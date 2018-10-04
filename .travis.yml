@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+- '8'
+
+script:
+- yarn test:cov
+- yarn build
+
+deploy:
+  provider: npm
+  email: rolandjitsu@gmail.com
+  api_key:
+    secure: SIMajitPIq2/9TtRGi+hhcWAy3EGY+FrpkvjsG4pfuRn92/NweqYa91yKlmgGQdte1LALToWT1uVPNABoP3IZToRe2au268MIaNCrEHo7yspHorGC1JvDDcLXAnqXz+ILxNODwmodMqVvM0xORXsUCXUu7y6HCLztiEJLwqTQKD846m3zK25AQ8Xvl8Vx8EKcAy3Uwqhw5s+GGcpp6fqo/gifvnQwHx9VEuke4ta4Weh59Qa6kyJdXcJ74IZtp5uKxDaoyM2mkZ0bFu+672nZE4QedhaCbBADhsKuzmJt4smEZIItN2DO7hwNXjlFT4mFwMe2KSq3G6DMNtAGS56omPDm1geArYSrYoBvUrUnGBJpRfRxJnT6ftIUd1vzTrwyS0UQuoU4DqhmHO/Tr7/AamKznhQk0p4iBcxZfUzP+uadtcN07+7ncWDj/YyobzvR7dWoZulSEjKp4AGDbe0rMxlBYTRO3lMTp96nHC6+hp9B5oMRmEol+hnxQYyh3LcBjfOh5ll//SbfzwO1Gx3+c3lwKbCheEFWWctlZ10VDHD2jQvr4UdAbWDT0scDghDkKtQWDCevnq+/0TEI1sF9IYs8DL66Rq3h4t+t+E0OsRKXGUI4fga5VpLl5/PcWe9WWbanDvZcAGJ3GA4TlH6jcUM2xoAzRQvUpMFQxQld9g=
+  skip_cleanup: true
+  on:
+    tags: true
+
+notifications:
+  email:
+    on_success: change
