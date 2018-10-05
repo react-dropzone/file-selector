@@ -13,11 +13,11 @@ const FILES_TO_IGNORE = [
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
  * @param evt
  */
-export async function fromEvent(evt: Event): Promise<FileWithPath[]> {
+export async function fromEvent(evt: Event): Promise<Array<FileWithPath | DataTransferItem>> {
     if (isDragEvt(evt)) {
         const dt = evt.dataTransfer!;
         if (dt.items && dt.items.length) {
-            return getDataTransferFiles(dt);
+            return getDataTransferFiles(dt, evt.type);
         } else if (dt.files && dt.files.length) {
             return fromFileList(dt.files);
         }
@@ -32,20 +32,24 @@ function isDragEvt(value: any): value is DragEvent {
     return !!value.dataTransfer;
 }
 
-async function getDataTransferFiles(dt: DataTransfer) {
-    const items = Array.from(dt.items);
-    const files = await Promise.all(items.map(item => toFilePromises(item)));
-    return flatten<FileWithPath>(files)
-        .filter(file => !FILES_TO_IGNORE.includes(file.name));
+async function getDataTransferFiles(dt: DataTransfer, type: string) {
+    const items = Array.from(dt.items)
+        .filter(item => item.kind === 'file');
+    // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
+    // only dragstart, and dragend (drop) has access to the data (source node),
+    // hence return the DataTransferItem for other event types
+    if (type === 'drop') {
+        const files = await Promise.all(items.map(item => toFilePromises(item)));
+        return flatten<FileWithPath>(files)
+            .filter(file => !FILES_TO_IGNORE.includes(file.name));
+    }
+    return items;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
 function toFilePromises(item: DataTransferItem) {
     if (typeof item.webkitGetAsEntry !== 'function') {
-        if (item.kind === 'file') {
-            return fromDataTransferItem(item);
-        }
-        return [];
+        return fromDataTransferItem(item);
     }
 
     const entry = item.webkitGetAsEntry();

@@ -1,3 +1,4 @@
+import {FileWithPath} from './file';
 import {fromEvent} from './file-selector';
 
 
@@ -21,8 +22,9 @@ it('should return the DataTransfer {files} if the passed event is a DragEvent', 
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
 
-    const [file] = files;
+    const [file] = files as FileWithPath[];
 
     expect(file.name).toBe(mockFile.name);
     expect(file.type).toBe(mockFile.type);
@@ -40,8 +42,9 @@ it('should return the evt {target} {files} if the passed event is an input evt',
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
 
-    const [file] = files;
+    const [file] = files as FileWithPath[];
 
     expect(file.name).toBe(mockFile.name);
     expect(file.type).toBe(mockFile.type);
@@ -60,8 +63,9 @@ it('uses the DataTransfer {items} instead of {files} if it exists', async () => 
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
 
-    const [file] = files;
+    const [file] = files as FileWithPath[];
 
     expect(file.name).toBe(mockFile.name);
     expect(file.type).toBe(mockFile.type);
@@ -78,9 +82,9 @@ it('uses the DataTransfer {files} if {items} is empty', async () => {
     const evt = dragEvtFromFilesAndItems([mockFile], []);
 
     const files = await fromEvent(evt);
-    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
 
-    const [file] = files;
+    const [file] = files as FileWithPath[];
 
     expect(file.name).toBe(mockFile.name);
     expect(file.type).toBe(mockFile.type);
@@ -90,11 +94,24 @@ it('uses the DataTransfer {files} if {items} is empty', async () => {
 });
 
 it('skips DataTransfer {items} that are of kind "string"', async () => {
-    const item = dataTransferItemFromStr('test');
-    const evt = dragEvtFromItems(item);
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const f = dataTransferItemFromFile(mockFile);
+    const str = dataTransferItemFromStr('test');
+    const evt = dragEvtFromItems([str, f]);
 
     const files = await fromEvent(evt);
-    expect(files).toHaveLength(0);
+    expect(files).toHaveLength(1);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(name);
 });
 
 it('can read a tree of directories recursively and return a flat list of FileWithPath objects', async () => {
@@ -126,26 +143,74 @@ it('can read a tree of directories recursively and return a flat list of FileWit
         fileSystemFileEntryFromFile(f8)
     ];
 
-    const evt = dragEvtFromItems(...entries.map(dataTransferItemFromEntry));
+    const evt = dragEvtFromItems(entries.map(dataTransferItemFromEntry));
 
-    const files = sortFiles(await fromEvent(evt));
+    const items = await fromEvent(evt);
+    const files = sortFiles(items as FileWithPath[]);
     expect(files).toHaveLength(6);
     expect(files.every(file => file instanceof File)).toBe(true);
     expect(files.every(file => typeof file.path === 'string')).toBe(true);
     expect(files).toEqual(mockFiles);
 });
 
+it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const item = dataTransferItemFromFile(mockFile);
+    const evt = dragEvtFromItems(item, 'dragenter');
 
-function dragEvtFromFiles(...files: File[]): DragEvent {
-    return {dataTransfer: {files}} as any;
-}
+    const items = await fromEvent(evt);
+    expect(items).toHaveLength(1);
 
-function dragEvtFromItems(...items: DataTransferItem[]): DragEvent {
-    return {dataTransfer: {items}} as any;
-}
+    const [itm] = items as DataTransferItem[];
 
-function dragEvtFromFilesAndItems(files: File[], items: DataTransferItem[]): DragEvent {
+    expect(itm.kind).toBe(item.kind);
+    expect(itm.kind).toBe('file');
+});
+
+// tslint:disable-next-line: max-line-length
+it('filters DataTransfer {items} if the DragEvent {type} is not "drop" and DataTransferItem {kind} is "string"', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const file = dataTransferItemFromFile(mockFile);
+    const str = dataTransferItemFromStr('test');
+    const evt = dragEvtFromItems([file, str], 'dragenter');
+
+    const items = await fromEvent(evt);
+    expect(items).toHaveLength(1);
+
+    const [item] = items as DataTransferItem[];
+
+    expect(item.kind).toBe(file.kind);
+    expect(item.kind).toBe('file');
+});
+
+
+function dragEvtFromFiles(files: File | File[], type: string = 'drop'): DragEvent {
     return {
+        type,
+        dataTransfer: {
+            files: Array.isArray(files) ? files : [files]
+        }
+    } as any;
+}
+
+function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
+    return {
+        type,
+        dataTransfer: {
+            items: Array.isArray(items) ? items : [items]
+        }
+    } as any;
+}
+
+function dragEvtFromFilesAndItems(files: File[], items: DataTransferItem[], type: string = 'drop'): DragEvent {
+    return {
+        type,
         dataTransfer: {files, items}
     } as any;
 }
@@ -177,6 +242,7 @@ function dataTransferItemFromStr(str: string): DataTransferItem {
 
 function dataTransferItemFromEntry(entry: FileEntry | DirEntry): DataTransferItem {
     return {
+        kind: 'file',
         webkitGetAsEntry: () => {
             return entry;
         }
