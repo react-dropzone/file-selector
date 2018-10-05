@@ -56,7 +56,26 @@ it('uses the DataTransfer {items} instead of {files} if it exists', async () => 
         type: 'application/json'
     });
     const item = dataTransferItemFromFile(mockFile);
-    const evt = dragEvtFromItems(item);
+    const evt = dragEvtFromFilesAndItems([], [item]);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+
+    const [file] = files;
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(name);
+});
+
+it('uses the DataTransfer {files} if {items} is empty', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const evt = dragEvtFromFilesAndItems([mockFile], []);
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
@@ -123,6 +142,12 @@ function dragEvtFromFiles(...files: File[]): DragEvent {
 
 function dragEvtFromItems(...items: DataTransferItem[]): DragEvent {
     return {dataTransfer: {items}} as any;
+}
+
+function dragEvtFromFilesAndItems(files: File[], items: DataTransferItem[]): DragEvent {
+    return {
+        dataTransfer: {files, items}
+    } as any;
 }
 
 function dataTransferItemFromFile(file: File): DataTransferItem {

@@ -16,12 +16,12 @@ const FILES_TO_IGNORE = [
 export async function fromEvent(evt: Event): Promise<FileWithPath[]> {
     if (isDragEvt(evt)) {
         const dt = evt.dataTransfer!;
-        if (dt.items) {
+        if (dt.items && dt.items.length) {
             return getDataTransferFiles(dt);
-        } else if (dt.files) {
+        } else if (dt.files && dt.files.length) {
             return fromFileList(dt.files);
         }
-    } else if (evt.target instanceof HTMLInputElement && evt.target.files) {
+    } else if (evt.target instanceof HTMLInputElement && evt.target.files && evt.target.files) {
         return fromFileList(evt.target.files);
     }
 
