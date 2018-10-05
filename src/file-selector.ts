@@ -42,7 +42,10 @@ async function getDataTransferFiles(dt: DataTransfer) {
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
 function toFilePromises(item: DataTransferItem) {
     if (typeof item.webkitGetAsEntry !== 'function') {
-        return fromDataTransferItem(item);
+        if (item.kind === 'file') {
+            return fromDataTransferItem(item);
+        }
+        return [];
     }
 
     const entry = item.webkitGetAsEntry();

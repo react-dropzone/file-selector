@@ -70,6 +70,14 @@ it('uses the DataTransfer {items} instead of {files} if it exists', async () => 
     expect(file.path).toBe(name);
 });
 
+it('skips DataTransfer {items} that are of kind "string"', async () => {
+    const item = dataTransferItemFromStr('test');
+    const evt = dragEvtFromItems(item);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(0);
+});
+
 it('can read a tree of directories recursively and return a flat list of FileWithPath objects', async () => {
     const mockFiles = sortFiles([
         createFile('ping.json', {ping: true}),
@@ -124,8 +132,20 @@ function dataTransferItemFromFile(file: File): DataTransferItem {
         getAsFile() {
             return file;
         },
-        getAsString() {
+        // tslint:disable-next-line: no-empty
+        getAsString() {}
+    } as any;
+}
+
+function dataTransferItemFromStr(str: string): DataTransferItem {
+    return {
+        kind: 'string',
+        type: 'text/plain',
+        getAsFile() {
             return null;
+        },
+        getAsString(cb: (data: string) => void) {
+            return cb(str);
         }
     } as any;
 }

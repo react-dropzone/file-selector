@@ -45,7 +45,8 @@ function withMimeType(file: File) {
 }
 
 function clone(file: File, type?: string) {
-    return new File([file], file.name, {
+    const data = file.slice();
+    return new File([data], file.name, {
         lastModified: file.lastModified,
         type: type || file.type
     });

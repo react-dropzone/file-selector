@@ -45,11 +45,15 @@ describe('toFile()', () => {
             type: 'application/json',
             lastModified: 1234567
         };
-        const file = new File([], 'test.json', opts);
+        const data = JSON.stringify({ping: true});
+        const file = new File([data], 'test.json', opts);
         const fwp = toFileWithPath(file);
 
         expect(fwp === file).toBe(false);
-        expect(fwp).toEqual(file);
+        expect(fwp.name).toEqual(file.name);
+        expect(fwp.type).toEqual(file.type);
+        expect(fwp.size).toEqual(file.size);
+        expect(fwp.lastModified).toEqual(file.lastModified);
     });
 
     it('should behave like a File', done => {
