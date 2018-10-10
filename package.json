@@ -13,7 +13,7 @@
     "DataTransfer",
     "File"
   ],
-  "homepage": "https://github.com/rolandjitsu/file-selector",
+  "homepage": "https://github.com/react-dropzone/file-selector",
   "license": "MIT",
   "author": {
     "name": "Roland Groza",

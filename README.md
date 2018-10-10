@@ -2,7 +2,7 @@
 
 > A small package for converting a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) or [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file) to a list of File objects.
 
-[![Travis (.org) branch](https://img.shields.io/travis/rolandjitsu/file-selector/master.svg?style=flat-square)](https://github.com/rolandjitsu/file-selector)
+[![Travis CI](https://img.shields.io/travis/react-dropzone/file-selector/master.svg?style=flat-square)](https://travis-ci.org/react-dropzone/file-selector)
 
 
 # Table of Contents
