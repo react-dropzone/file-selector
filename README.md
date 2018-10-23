@@ -34,8 +34,8 @@ For CDN, you can use [unpkg](https://unpkg.com):
 The global namespace for file-selector is `fileSelector`:
 ```js
 const {fromEvent} = fileSelector;
-document.addEventListener('drop', evt => {
-    const files = fromEvent(evt);
+document.addEventListener('drop', async evt => {
+    const files = await fromEvent(evt);
     console.log(files);
 });
 ```
@@ -48,8 +48,8 @@ document.addEventListener('drop', evt => {
 Convert a `DragEvent` to File objects:
 ```ts
 import {fromEvent} from 'file-selector';
-document.addEventListener('drop', evt => {
-    const files = fromEvent(evt);
+document.addEventListener('drop', async evt => {
+    const files = await fromEvent(evt);
     console.log(files);
 });
 ```
@@ -58,8 +58,8 @@ Convert a file input to File objects:
 ```ts
 import {fromEvent} from 'file-selector';
 const input = document.getElementById('myInput');
-input.addEventListener('change', evt => {
-    const files = fromEvent(evt);
+input.addEventListener('change', async evt => {
+    const files = await fromEvent(evt);
     console.log(files);
 });
 ```
@@ -68,8 +68,8 @@ input.addEventListener('change', evt => {
 Convert a `DragEvent` to File objects:
 ```ts
 const {fromEvent} = require('file-selector');
-document.addEventListener('drop', evt => {
-    const files = fromEvent(evt);
+document.addEventListener('drop', async evt => {
+    const files = await fromEvent(evt);
     console.log(files);
 });
 ```
