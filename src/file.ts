@@ -46,6 +46,22 @@ function withMimeType(file: File) {
 
 function clone(file: File, type?: string) {
     const data = file.slice();
+
+    // Edge Hack
+    // ---------
+    // Edge doesn't support File constructor so instead we're using Blob and filling missing fields so it
+    // will look like a File
+    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+        const blob = new Blob([data], { type: type || file.type });
+
+        // @ts-ignore
+        blob.name = file.name;
+
+        // @ts-ignore
+        blob.lastModified = file.lastModified;
+        return blob as File;
+    }
+
     return new File([data], file.name, {
         lastModified: file.lastModified,
         type: type || file.type
