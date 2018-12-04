@@ -60,7 +60,6 @@ describe('toFile()', () => {
     });
 
     it('clones the File as a blob', () => {
-      var global = 
       const opts: FilePropertyBag = {
         type: 'plain/text',
         lastModified: 1234567
