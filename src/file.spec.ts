@@ -60,22 +60,22 @@ describe('toFile()', () => {
     });
 
     it('clones the File as a blob', () => {
-      const opts: FilePropertyBag = {
-        type: 'plain/text',
-        lastModified: 1234567
-      };
-      const data = JSON.stringify({ping: true});
-      const file = new File([data], 'test.txt', opts);
-      global.OriginalFile = File;
-      global.File = MockFile;
-      const clonedFile = clone(file);
-      global.File = (global as any).OriginalFile;      
+        const opts: FilePropertyBag = {
+            type: 'plain/text',
+            lastModified: 1234567
+        };
+        const data = JSON.stringify({ping: true});
+        const file = new File([data], 'test.txt', opts);
+        global.OriginalFile = File;
+        global.File = MockFile;
+        const clonedFile = clone(file);
+        global.File = (global as any).OriginalFile;      
 
-      expect(clonedFile === file).toBe(false);
-      expect(clonedFile.name).toEqual(file.name);
-      expect(clonedFile.type).toEqual(file.type);
-      expect(clonedFile.size).toEqual(file.size);
-      expect(clonedFile.lastModified).toEqual(file.lastModified);
+        expect(clonedFile === file).toBe(false);
+        expect(clonedFile.name).toEqual(file.name);
+        expect(clonedFile.type).toEqual(file.type);
+        expect(clonedFile.size).toEqual(file.size);
+        expect(clonedFile.lastModified).toEqual(file.lastModified);
     });
     
     it('should behave like a File', done => {
