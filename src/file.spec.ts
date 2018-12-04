@@ -1,4 +1,4 @@
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {COMMON_MIME_TYPES, toFileWithPath, clone} from './file';
 import {MockFile} from './file.mock';
 
 declare let global: any;
