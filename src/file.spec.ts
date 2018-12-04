@@ -1,4 +1,7 @@
 import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {MockFile} from './file.mock';
+
+declare let global: any;
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
@@ -56,6 +59,26 @@ describe('toFile()', () => {
         expect(fwp.lastModified).toEqual(file.lastModified);
     });
 
+    it('clones the File as a blob', () => {
+      var global = 
+      const opts: FilePropertyBag = {
+        type: 'plain/text',
+        lastModified: 1234567
+      };
+      const data = JSON.stringify({ping: true});
+      const file = new File([data], 'test.txt', opts);
+      global.OriginalFile = File;
+      global.File = MockFile;
+      const clonedFile = clone(file);
+      global.File = (global as any).OriginalFile;      
+
+      expect(clonedFile === file).toBe(false);
+      expect(clonedFile.name).toEqual(file.name);
+      expect(clonedFile.type).toEqual(file.type);
+      expect(clonedFile.size).toEqual(file.size);
+      expect(clonedFile.lastModified).toEqual(file.lastModified);
+    });
+    
     it('should behave like a File', done => {
         const data = {ping: true};
         const json = JSON.stringify(data);
