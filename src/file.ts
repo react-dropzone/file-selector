@@ -47,7 +47,7 @@ function withMimeType(file: File) {
 export function clone(file: File, fType?: string) {
     const data = file.slice();
     const {name, lastModified} = file;
-    const type = fType || file.type;    
+    const type = fType || file.type;
 
     try {
         return new File([data], name, {lastModified, type});
