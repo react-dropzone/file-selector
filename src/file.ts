@@ -44,10 +44,16 @@ function withMimeType(file: File) {
     return clone(file);
 }
 
-function clone(file: File, type?: string) {
+export function clone(file: File, fType?: string) {
     const data = file.slice();
-    return new File([data], file.name, {
-        lastModified: file.lastModified,
-        type: type || file.type
-    });
+    const {name, lastModified} = file;
+    const type = fType || file.type;
+
+    try {
+        return new File([data], name, {lastModified, type});
+    } catch (e) {
+        const blob = new Blob([data], {type});
+        Object.assign(blob, {name, lastModified});
+        return blob as File;
+    }
 }
