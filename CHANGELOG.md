@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.6"></a>
+## [0.1.6](https://github.com/react-dropzone/file-selector/compare/v0.1.5...v0.1.6) (2018-12-10)
+
+
+### Bug Fixes
+
+* replaced File constructor with Blob for Edge ([#1](https://github.com/react-dropzone/file-selector/issues/1)) ([1eb73d0](https://github.com/react-dropzone/file-selector/commit/1eb73d0))
+
+
+
 <a name="0.1.5"></a>
 ## [0.1.5](https://github.com/react-dropzone/file-selector/compare/v0.1.4...v0.1.5) (2018-10-18)
 
