@@ -61,6 +61,18 @@ describe('toFile()', () => {
         }
     });
 
+    it('sets the {type} from extension regardless of case', () => {
+        const types = Array.from(COMMON_MIME_TYPES.values());
+        const files = Array.from(COMMON_MIME_TYPES.keys())
+            .map(key => key.toUpperCase())
+            .map(ext => new File([], `test.${ext}`))
+            .map(f => toFileWithPath(f));
+
+        for (const file of files) {
+            expect(types.includes(file.type)).toBe(true);
+        }
+    });
+
     it('clones the File', () => {
         const opts: FilePropertyBag = {
             type: 'application/json',

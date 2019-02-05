@@ -34,7 +34,7 @@ function withMimeType(file: File) {
 
     if (name && hasExtension && !file.type) {
         const ext = name.split('.')
-            .pop()!;
+            .pop()!.toLowerCase();
         const type = COMMON_MIME_TYPES.get(ext);
         if (type) {
             return clone(file, type);
