@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.7"></a>
+## [0.1.7](https://github.com/react-dropzone/file-selector/compare/v0.1.6...v0.1.7) (2019-02-13)
+
+
+### Bug Fixes
+
+* add 'doc' and 'docx' to COMMON_MIME_TYPES ([415bdfb](https://github.com/react-dropzone/file-selector/commit/415bdfb))
+* ignore case when checking for common file extensions ([1a25da8](https://github.com/react-dropzone/file-selector/commit/1a25da8))
+
+
+
 <a name="0.1.6"></a>
 ## [0.1.6](https://github.com/react-dropzone/file-selector/compare/v0.1.5...v0.1.6) (2018-12-10)
 
