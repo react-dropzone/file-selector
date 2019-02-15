@@ -34,28 +34,18 @@ function withMimeType(file: File) {
     const {name} = file;
     const hasExtension = name && name.lastIndexOf('.') !== -1;
 
-    if (name && hasExtension && !file.type) {
+    if (hasExtension && !file.type) {
         const ext = name.split('.')
             .pop()!.toLowerCase();
         const type = COMMON_MIME_TYPES.get(ext);
         if (type) {
-            return clone(file, type);
+            Object.defineProperty(file, 'type', {
+                value: type,
+                writable: false,
+                configurable: false
+            });
         }
     }
 
-    return clone(file);
-}
-
-export function clone(file: File, fType?: string) {
-    const data = file.slice();
-    const {name, lastModified} = file;
-    const type = fType || file.type;
-
-    try {
-        return new File([data], name, {lastModified, type});
-    } catch (e) {
-        const blob = new Blob([data], {type});
-        Object.assign(blob, {name, lastModified});
-        return blob as File;
-    }
+    return file;
 }

@@ -14,29 +14,33 @@ const FILES_TO_IGNORE = [
  * @param evt
  */
 export async function fromEvent(evt: Event): Promise<Array<FileWithPath | DataTransferItem>> {
-    if (isDragEvt(evt)) {
-        const dt = evt.dataTransfer!;
-        if (dt.items && dt.items.length) {
-            return getDataTransferFiles(dt, evt.type);
-        } else if (dt.files && dt.files.length) {
-            return fromFileList(dt.files);
-        }
-    } else if (evt.target instanceof HTMLInputElement && evt.target.files && evt.target.files) {
-        return fromFileList(evt.target.files);
-    }
-
-    return [];
+    return isDragEvt(evt) && evt.dataTransfer
+        ? getDataTransferFiles(evt.dataTransfer, evt.type)
+        : getInputFiles(evt);
 }
 
 function isDragEvt(value: any): value is DragEvent {
     return !!value.dataTransfer;
 }
 
+function getInputFiles(evt: Event) {
+    const files = isInput(evt.target)
+        ? evt.target.files
+            ? Array.from(evt.target.files)
+            : []
+        : [];
+    return files.map(file => toFileWithPath(file));
+}
+
+function isInput(value: EventTarget | null): value is HTMLInputElement {
+    return value !== null;
+}
+
 async function getDataTransferFiles(dt: DataTransfer, type: string) {
     const items = Array.from(dt.items)
         .filter(item => item.kind === 'file');
     // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
-    // only dragstart, and dragend (drop) has access to the data (source node),
+    // only 'dragstart' and 'drop' has access to the data (source node),
     // hence return the DataTransferItem for other event types
     if (type === 'drop') {
         const files = await Promise.all(items.map(item => toFilePromises(item)));
@@ -53,11 +57,15 @@ function toFilePromises(item: DataTransferItem) {
     }
 
     const entry = item.webkitGetAsEntry();
-    if (entry) {
-        return fromEntry(entry);
+
+    // Safari supports dropping an image node from a different window and can be retrieved using
+    // the DataTransferItem.getAsFile() API
+    // NOTE: FileSystemEntry.file() throws if trying to get the file
+    if (entry && entry.isDirectory) {
+        return fromDirEntry(entry) as any;
     }
 
-    return [];
+    return fromDataTransferItem(item);
 }
 
 function flatten<T>(items: any[]): T[] {
@@ -67,40 +75,39 @@ function flatten<T>(items: any[]): T[] {
     ], []);
 }
 
-function fromFileList(fileList: FileList) {
-    return Array.from(fileList)
-        .map(file => toFileWithPath(file));
-}
-
 function fromDataTransferItem(item: DataTransferItem) {
-    const file = item.getAsFile()!;
+    const file = item.getAsFile();
+    if (!file) {
+        return Promise.reject(`${item} is not a File`);
+    }
     const fwp = toFileWithPath(file);
     return Promise.resolve(fwp);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
 async function fromEntry(entry: any) {
-    if (entry.isDirectory) {
-        return fromDirEntry(entry);
-    } else {
-        return fromFileEntry(entry);
-    }
+    return entry.isDirectory ? fromDirEntry(entry) : fromFileEntry(entry);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry
 function fromDirEntry(entry: any) {
     const reader = entry.createReader();
 
-    return new Promise<FileArray[]>(resolve => {
+    return new Promise<FileArray[]>((resolve, reject) => {
         const entries: Array<Promise<FileValue[]>> = [];
 
         function readEntries() {
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryReader/readEntries
-            reader.readEntries((batch: any[]) => {
+            reader.readEntries(async (batch: any[]) => {
                 if (!batch.length) {
                     // Done reading directory
-                    resolve(Promise.all(entries));
+                    try {
+                        const files = await Promise.all(entries);
+                        resolve(files);
+                    } catch (err) {
+                        reject(err);
+                    }
                 } else {
                     const items = Promise.all(batch.map(fromEntry));
                     entries.push(items);
@@ -108,7 +115,9 @@ function fromDirEntry(entry: any) {
                     // Continue reading
                     readEntries();
                 }
-            }, noop);
+            }, (err: any) => {
+                reject(err);
+            });
         }
 
         readEntries();
@@ -117,17 +126,15 @@ function fromDirEntry(entry: any) {
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
 async function fromFileEntry(entry: any) {
-    return new Promise<FileWithPath>(resolve => {
+    return new Promise<FileWithPath>((resolve, reject) => {
         entry.file((file: File) => {
             const fwp = toFileWithPath(file, entry.fullPath);
             resolve(fwp);
+        }, (err: any) => {
+            reject(err);
         });
     });
 }
-
-// tslint:disable-next-line: no-empty
-function noop() {}
-
 
 // Infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540

@@ -13,26 +13,6 @@ it('should return an empty array if the passed event is not a DragEvent', async 
     expect(files).toHaveLength(0);
 });
 
-it('should return the DataTransfer {files} if the passed event is a DragEvent', async () => {
-    const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
-    const evt = dragEvtFromFiles(mockFile);
-
-    const files = await fromEvent(evt);
-    expect(files).toHaveLength(1);
-    expect(files.every(file => file instanceof File)).toBe(true);
-
-    const [file] = files as FileWithPath[];
-
-    expect(file.name).toBe(mockFile.name);
-    expect(file.type).toBe(mockFile.type);
-    expect(file.size).toBe(mockFile.size);
-    expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
-});
-
 it('should return the evt {target} {files} if the passed event is an input evt', async () => {
     const name = 'test.json';
     const mockFile = createFile(name, {ping: true}, {
@@ -53,7 +33,13 @@ it('should return the evt {target} {files} if the passed event is an input evt',
     expect(file.path).toBe(name);
 });
 
-it('uses the DataTransfer {items} instead of {files} if it exists', async () => {
+it('should return an empty array if the evt {target} has no {files} prop', async () => {
+    const evt = inputEvtFromFiles();
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(0);
+});
+
+it('should return files from DataTransfer {items} if the passed event is a DragEvent', async () => {
     const name = 'test.json';
     const mockFile = createFile(name, {ping: true}, {
         type: 'application/json'
@@ -63,25 +49,6 @@ it('uses the DataTransfer {items} instead of {files} if it exists', async () => 
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
-    expect(files.every(file => file instanceof File)).toBe(true);
-
-    const [file] = files as FileWithPath[];
-
-    expect(file.name).toBe(mockFile.name);
-    expect(file.type).toBe(mockFile.type);
-    expect(file.size).toBe(mockFile.size);
-    expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
-});
-
-it('uses the DataTransfer {files} if {items} is empty', async () => {
-    const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
-    const evt = dragEvtFromFilesAndItems([mockFile], []);
-
-    const files = await fromEvent(evt);
     expect(files.every(file => file instanceof File)).toBe(true);
 
     const [file] = files as FileWithPath[];
@@ -128,22 +95,20 @@ it('can read a tree of directories recursively and return a flat list of FileWit
         createFile('.DS_Store', {macOs: true}),
         createFile('Thumbs.db', {windows: true})
     ];
-    const entries = [
-        fileSystemFileEntryFromFile(f1),
-        fileSystemFileEntryFromFile(f2),
-        fileSystemDirEntryFromFile([
+    const evt = dragEvtFromItems([
+        dataTransferItemFromEntry(fileSystemFileEntryFromFile(f1), f1),
+        dataTransferItemFromEntry(fileSystemFileEntryFromFile(f2), f2),
+        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
             fileSystemFileEntryFromFile(f3),
             fileSystemDirEntryFromFile([
                 fileSystemFileEntryFromFile(f4)
             ]),
             fileSystemFileEntryFromFile(f5)
-        ], 2),
-        fileSystemFileEntryFromFile(f6),
-        fileSystemFileEntryFromFile(f7),
-        fileSystemFileEntryFromFile(f8)
-    ];
-
-    const evt = dragEvtFromItems(entries.map(dataTransferItemFromEntry));
+        ], 2)),
+        dataTransferItemFromEntry(fileSystemFileEntryFromFile(f6), f6),
+        dataTransferItemFromEntry(fileSystemFileEntryFromFile(f7), f7),
+        dataTransferItemFromEntry(fileSystemFileEntryFromFile(f8), f8)
+    ]);
 
     const items = await fromEvent(evt);
     const files = sortFiles(items as FileWithPath[]);
@@ -170,34 +135,81 @@ it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', asy
     expect(itm.kind).toBe('file');
 });
 
-// tslint:disable-next-line: max-line-length
-it('filters DataTransfer {items} if the DragEvent {type} is not "drop" and DataTransferItem {kind} is "string"', async () => {
-    const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
-    const file = dataTransferItemFromFile(mockFile);
-    const str = dataTransferItemFromStr('test');
-    const evt = dragEvtFromItems([file, str], 'dragenter');
+it(
+    'filters DataTransfer {items} if the DragEvent {type} is not "drop" and DataTransferItem {kind} is "string"',
+    async () => {
+        const name = 'test.json';
+        const mockFile = createFile(name, {ping: true}, {
+            type: 'application/json'
+        });
+        const file = dataTransferItemFromFile(mockFile);
+        const str = dataTransferItemFromStr('test');
+        const evt = dragEvtFromItems([file, str], 'dragenter');
 
-    const items = await fromEvent(evt);
-    expect(items).toHaveLength(1);
+        const items = await fromEvent(evt);
+        expect(items).toHaveLength(1);
 
-    const [item] = items as DataTransferItem[];
+        const [item] = items as DataTransferItem[];
 
-    expect(item.kind).toBe(file.kind);
-    expect(item.kind).toBe('file');
+        expect(item.kind).toBe(file.kind);
+        expect(item.kind).toBe('file');
+    }
+);
+
+it('should throw if reading dir entries fails', async done => {
+    const mockFiles = sortFiles([
+        createFile('ping.json', {ping: true}),
+        createFile('pong.json', {pong: true})
+    ]);
+    const [f1, f2] = mockFiles;
+    const evt = dragEvtFromItems([
+        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
+            fileSystemFileEntryFromFile(f1),
+            fileSystemFileEntryFromFile(f2)
+        ], 1, 1))
+    ]);
+
+    try {
+        await fromEvent(evt);
+        done.fail('Getting the files should have failed');
+    } catch (err) {
+        done();
+    }
 });
 
+it('should throw if reading file entry fails', async done => {
+    const mockFiles = sortFiles([
+        createFile('ping.json', {ping: true}),
+        createFile('pong.json', {pong: true})
+    ]);
+    const [f1, f2] = mockFiles;
+    const evt = dragEvtFromItems([
+        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
+            fileSystemFileEntryFromFile(f1),
+            fileSystemFileEntryFromFile(f2, 'Oops :(')
+        ], 1, 1))
+    ]);
 
-function dragEvtFromFiles(files: File | File[], type: string = 'drop'): DragEvent {
-    return {
-        type,
-        dataTransfer: {
-            files: Array.isArray(files) ? files : [files]
-        }
-    } as any;
-}
+    try {
+        await fromEvent(evt);
+        done.fail('Getting the files should have failed');
+    } catch (err) {
+        done();
+    }
+});
+
+it('should throw if DataTransferItem is not a File', async done => {
+    const item = dataTransferItem(null, 'file');
+    const evt = dragEvtFromFilesAndItems([], [item]);
+
+    try {
+        await fromEvent(evt);
+        done.fail('Getting the files should have failed');
+    } catch (err) {
+        done();
+    }
+});
+
 
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
     return {
@@ -227,6 +239,16 @@ function dataTransferItemFromFile(file: File): DataTransferItem {
     } as any;
 }
 
+function dataTransferItem(file?: any, kind?: string, type: string = ''): DataTransferItem {
+    return {
+        kind,
+        type,
+        getAsFile() {
+            return file;
+        }
+    } as any;
+}
+
 function dataTransferItemFromStr(str: string): DataTransferItem {
     return {
         kind: 'string',
@@ -240,26 +262,37 @@ function dataTransferItemFromStr(str: string): DataTransferItem {
     } as any;
 }
 
-function dataTransferItemFromEntry(entry: FileEntry | DirEntry): DataTransferItem {
+function dataTransferItemFromEntry(entry: FileEntry | DirEntry, file?: File): DataTransferItem {
     return {
         kind: 'file',
+        getAsFile() {
+            return file;
+        },
         webkitGetAsEntry: () => {
             return entry;
         }
     } as any;
 }
 
-function fileSystemFileEntryFromFile(file: File): FileEntry {
+function fileSystemFileEntryFromFile(file: File, err?: any): FileEntry {
     return {
         isDirectory: false,
         isFile: true,
-        file(cb: (file: File) => void) {
-            cb(file);
+        file(cb, errCb) {
+            if (err) {
+                errCb(err);
+            } else {
+                cb(file);
+            }
         }
     };
 }
 
-function fileSystemDirEntryFromFile(files: Array<FileEntry | DirEntry>, batchSize: number = 1): DirEntry {
+function fileSystemDirEntryFromFile(
+    files: Array<FileEntry | DirEntry>,
+    batchSize: number = 1,
+    throwAfter: number = 0
+): DirEntry {
     const copy = files.slice(0);
     const batches: Array<Array<FileEntry | DirEntry>> = [];
 
@@ -278,9 +311,13 @@ function fileSystemDirEntryFromFile(files: Array<FileEntry | DirEntry>, batchSiz
             let cbCount = 0;
 
             return {
-                readEntries(cb) {
+                readEntries(cb, errCb) {
                     const batch = batches[cbCount];
                     cbCount++;
+
+                    if (throwAfter !== 0 && cbCount === throwAfter) {
+                        errCb('Failed to read files');
+                    }
 
                     if (batch) {
                         cb(batch);
@@ -295,9 +332,11 @@ function fileSystemDirEntryFromFile(files: Array<FileEntry | DirEntry>, batchSiz
 
 function inputEvtFromFiles(...files: File[]): Event {
     const input = document.createElement('input');
-    Object.defineProperty(input, 'files', {
-        value: files
-    });
+    if (files.length) {
+        Object.defineProperty(input, 'files', {
+            value: files
+        });
+    }
     return {
         target: input
     } as any;
@@ -316,7 +355,10 @@ function sortFiles<T extends File>(files: T[]) {
 
 
 interface FileEntry extends Entry {
-    file(cb: (file: File) => void): void;
+    file(
+        cb: (file: File) => void,
+        errCb: (err: any) => void
+    ): void;
 }
 
 interface DirEntry extends Entry {
@@ -329,5 +371,8 @@ interface Entry {
 }
 
 interface DirReader {
-    readEntries(cb: (entries: Array<FileEntry | DirEntry>) => void): void;
+    readEntries(
+        cb: (entries: Array<FileEntry | DirEntry>) => void,
+        errCb: (err: any) => void
+    ): void;
 }

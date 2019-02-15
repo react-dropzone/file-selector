@@ -1,25 +1,4 @@
-import {clone, COMMON_MIME_TYPES, toFileWithPath} from './file';
-
-class MockFile {
-    public lastModified: number = 0;
-    public name: string = '';
-    public size: number = 0;
-    public type: string = '';
-    public blob: Blob;
-
-    constructor(fileBits: BlobPart[], fileName: string, options: FilePropertyBag) {
-        this.lastModified = options.lastModified || 0;
-        this.name = fileName;
-        this.type = options.type || '';
-        this.blob = new Blob(fileBits);
-        this.size = this.blob.size;
-        throw new Error('Error!');
-    }
-
-    public slice() {
-        return this.blob;
-    }
-}
+import {COMMON_MIME_TYPES, toFileWithPath} from './file';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
@@ -71,43 +50,6 @@ describe('toFile()', () => {
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);
         }
-    });
-
-    it('clones the File', () => {
-        const opts: FilePropertyBag = {
-            type: 'application/json',
-            lastModified: 1234567
-        };
-        const data = JSON.stringify({ping: true});
-        const file = new File([data], 'test.json', opts);
-        const fwp = toFileWithPath(file);
-
-        expect(fwp === file).toBe(false);
-        expect(fwp.name).toEqual(file.name);
-        expect(fwp.type).toEqual(file.type);
-        expect(fwp.size).toEqual(file.size);
-        expect(fwp.lastModified).toEqual(file.lastModified);
-    });
-
-    it('clones the File as a blob', () => {
-        const g = global as any;
-        const opts: FilePropertyBag = {
-            type: 'plain/text',
-            lastModified: 1234567
-        };
-        const data = JSON.stringify({ping: true});
-        const file = new File([data], 'test.txt', opts);
-        g.OriginalFile = File;
-        g.File = MockFile;
-        const clonedFile = clone(file);
-        g.File = g.OriginalFile;
-
-        expect(clonedFile).toBeInstanceOf(Blob);
-        expect(clonedFile === file).toBe(false);
-        expect(clonedFile.name).toEqual(file.name);
-        expect(clonedFile.type).toEqual(file.type);
-        expect(clonedFile.size).toEqual(file.size);
-        expect(clonedFile.lastModified).toEqual(file.lastModified);
     });
 
     it('should behave like a File', done => {
