@@ -95,6 +95,7 @@ function fromDirEntry(entry: any) {
 
     return new Promise<FileArray[]>((resolve, reject) => {
         const entries: Array<Promise<FileValue[]>> = [];
+        let empty = true;
 
         function readEntries() {
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
@@ -104,6 +105,9 @@ function fromDirEntry(entry: any) {
                     // Done reading directory
                     try {
                         const files = await Promise.all(entries);
+                        if (empty) {
+                            files.push([createEmptyDirFile(entry)]);
+                        }
                         resolve(files);
                     } catch (err) {
                         reject(err);
@@ -113,6 +117,7 @@ function fromDirEntry(entry: any) {
                     entries.push(items);
 
                     // Continue reading
+                    empty = false;
                     readEntries();
                 }
             }, (err: any) => {
@@ -122,6 +127,12 @@ function fromDirEntry(entry: any) {
 
         readEntries();
     });
+}
+
+function createEmptyDirFile(entry: any) {
+    const file = new File([], entry.name);
+    const fwp = toFileWithPath(file, entry.fullPath  + '/');
+    return fwp;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry

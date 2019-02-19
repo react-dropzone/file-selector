@@ -118,6 +118,43 @@ it('can read a tree of directories recursively and return a flat list of FileWit
     expect(files).toEqual(mockFiles);
 });
 
+
+it('returns empty folders from DataTransfer', async () => {
+   const mockFs = sortFiles([
+       createFile('ping.json', {ping: true}),
+       createFile('pong.json', {pong: true}),
+       createFile('foo.json', {foo: true}),
+       createFile('bar.json', {bar: true}),
+       createFile('john.json', {john: true}),
+       createFile('baz', {baz: true}),
+       createFile('qux', {qux: true}),
+       createFile('quux', {quux: true})
+   ]);
+
+   const [f1, f2, f3, f4, f5, d1, d2, d3] = mockFs;
+   const evt = dragEvtFromItems([
+       dataTransferItemFromEntry(fileSystemDirEntryFromFile([], 1, 0, d1.name), d1),
+       dataTransferItemFromEntry(fileSystemFileEntryFromFile(f1), f1),
+       dataTransferItemFromEntry(fileSystemDirEntryFromFile([
+           fileSystemFileEntryFromFile(f2),
+           fileSystemDirEntryFromFile([
+               fileSystemFileEntryFromFile(f3),
+               fileSystemDirEntryFromFile([], 3, 0, d2.name),
+               fileSystemFileEntryFromFile(f4)
+           ]),
+           fileSystemDirEntryFromFile([], 2, 0, d3.name)
+       ], 1)),
+       dataTransferItemFromEntry(fileSystemFileEntryFromFile(f5), f5)
+   ]);
+
+   const items = await fromEvent(evt);
+   const fs = sortFiles(items as FileWithPath[]);
+   expect(fs).toHaveLength(mockFs.length);
+   expect(fs.every(file => file instanceof File)).toBe(true);
+   expect(fs.every(file => typeof file.path === 'string')).toBe(true);
+   expect(fs).toEqual(mockFs);
+});
+
 it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', async () => {
     const name = 'test.json';
     const mockFile = createFile(name, {ping: true}, {
@@ -291,7 +328,8 @@ function fileSystemFileEntryFromFile(file: File, err?: any): FileEntry {
 function fileSystemDirEntryFromFile(
     files: Array<FileEntry | DirEntry>,
     batchSize: number = 1,
-    throwAfter: number = 0
+    throwAfter: number = 0,
+    fullPath?: string
 ): DirEntry {
     const copy = files.slice(0);
     const batches: Array<Array<FileEntry | DirEntry>> = [];
@@ -307,6 +345,7 @@ function fileSystemDirEntryFromFile(
     return {
         isDirectory: true,
         isFile: false,
+        fullPath,
         createReader: () => {
             let cbCount = 0;
 
@@ -368,6 +407,7 @@ interface DirEntry extends Entry {
 interface Entry {
     isDirectory: boolean;
     isFile: boolean;
+    fullPath?: string;
 }
 
 interface DirReader {
