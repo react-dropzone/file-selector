@@ -17,8 +17,16 @@ export const COMMON_MIME_TYPES = new Map([
 
 export function toFileWithPath(file: File, path?: string): FileWithPath {
     const f = withMimeType(file);
+    const {webkitRelativePath} = file as FileWithWebkitPath;
     Object.defineProperty(f, 'path', {
-        value: typeof path === 'string' ? path : file.name,
+        value: typeof path === 'string'
+            ? path
+            // If <input webkitdirectory> is set,
+            // the File will have a {webkitRelativePath} property
+            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+            : typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
+                ? webkitRelativePath
+                : file.name,
         writable: false,
         configurable: false
     });
@@ -29,6 +37,9 @@ export interface FileWithPath extends File {
     readonly path?: string;
 }
 
+interface FileWithWebkitPath extends File {
+    readonly webkitRelativePath?: string;
+}
 
 function withMimeType(file: File) {
     const {name} = file;

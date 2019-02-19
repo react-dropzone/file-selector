@@ -29,6 +29,16 @@ describe('toFile()', () => {
         expect(fileWithPath.path).toBe(name);
     });
 
+    it('uses the File {webkitRelativePath} as {path} if it exists', () => {
+        const path = 'test/test.json';
+        const file = new File([], name);
+        Object.defineProperty(file, 'webkitRelativePath', {
+            value: path
+        });
+        const fileWithPath = toFileWithPath(file);
+        expect(fileWithPath.path).toBe(path);
+    });
+
     it('sets the {type} from extension', () => {
         const types = Array.from(COMMON_MIME_TYPES.values());
         const files = Array.from(COMMON_MIME_TYPES.keys())
