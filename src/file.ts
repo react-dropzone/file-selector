@@ -28,7 +28,8 @@ export function toFileWithPath(file: File, path?: string): FileWithPath {
                 ? webkitRelativePath
                 : file.name,
         writable: false,
-        configurable: false
+        configurable: false,
+        enumerable: true
     });
     return f;
 }
@@ -53,7 +54,8 @@ function withMimeType(file: File) {
             Object.defineProperty(file, 'type', {
                 value: type,
                 writable: false,
-                configurable: false
+                configurable: false,
+                enumerable: true
             });
         }
     }

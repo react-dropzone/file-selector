@@ -1,3 +1,4 @@
+// tslint:disable: forin
 import {COMMON_MIME_TYPES, toFileWithPath} from './file';
 
 describe('toFile()', () => {
@@ -20,6 +21,21 @@ describe('toFile()', () => {
         const file = new File([], 'test.json');
         const fileWithPath = toFileWithPath(file, path);
         expect(fileWithPath.path).toBe(path);
+    });
+
+    test('{path} is enumerable', () => {
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        const fileWithPath = toFileWithPath(file, path);
+
+        expect(Object.keys(fileWithPath)).toContain('path');
+
+        const keys = [];
+        for (const key in fileWithPath) {
+            keys.push(key);
+        }
+
+        expect(keys).toContain('path');
     });
 
     it('uses the File {name} as {path} if not provided', () => {
@@ -48,6 +64,20 @@ describe('toFile()', () => {
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);
         }
+    });
+
+    test('{type} is enumerable', () => {
+        const file = new File([], 'test.gif');
+        const fileWithPath = toFileWithPath(file);
+
+        expect(Object.keys(fileWithPath)).toContain('type');
+
+        const keys = [];
+        for (const key in fileWithPath) {
+            keys.push(key);
+        }
+
+        expect(keys).toContain('type');
     });
 
     it('sets the {type} from extension regardless of case', () => {
