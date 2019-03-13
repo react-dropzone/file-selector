@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.11"></a>
+## [0.1.11](https://github.com/react-dropzone/file-selector/compare/v0.1.10...v0.1.11) (2019-03-13)
+
+
+### Bug Fixes
+
+* fix regression in 9c8be3ac and close [#9](https://github.com/react-dropzone/file-selector/issues/9) ([ca28f62](https://github.com/react-dropzone/file-selector/commit/ca28f62))
+
+
+
 <a name="0.1.10"></a>
 ## [0.1.10](https://github.com/react-dropzone/file-selector/compare/v0.1.9...v0.1.10) (2019-02-25)
 
