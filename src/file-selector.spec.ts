@@ -33,6 +33,26 @@ it('should return the evt {target} {files} if the passed event is an input evt',
     expect(file.path).toBe(name);
 });
 
+it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11)', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const evt = dragEvt([mockFile]);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(name);
+});
+
 it('should return an empty array if the evt {target} has no {files} prop', async () => {
     const evt = inputEvtFromFiles();
     const files = await fromEvent(evt);
@@ -156,6 +176,15 @@ it(
     }
 );
 
+it('filters thumbnail cache files', async () => {
+    const mockFile = createFile('Thumbs.db', {ping: true}, {
+        type: 'text/plain'
+    });
+    const evt = dragEvt([mockFile]);
+    const items = await fromEvent(evt);
+    expect(items).toHaveLength(0);
+});
+
 it('should throw if reading dir entries fails', async done => {
     const mockFiles = sortFiles([
         createFile('ping.json', {ping: true}),
@@ -217,6 +246,13 @@ function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: st
         dataTransfer: {
             items: Array.isArray(items) ? items : [items]
         }
+    } as any;
+}
+
+function dragEvt(files?: File[], items?: DataTransferItem[], type: string = 'drop'): DragEvent {
+    return {
+        type,
+        dataTransfer: {items, files}
     } as any;
 }
 
