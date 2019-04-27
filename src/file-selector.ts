@@ -1,4 +1,4 @@
-import {FileWithPath, ensureFileWithPath} from './file';
+import {ensureFileWithPath, FileWithPath} from './file';
 
 
 const FILES_TO_IGNORE = [
