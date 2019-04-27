@@ -1,4 +1,4 @@
-import {FileWithPath, toFileWithPath} from './file';
+import {FileWithPath, ensureFileWithPath} from './file';
 
 
 const FILES_TO_IGNORE = [
@@ -27,10 +27,10 @@ function isDragEvt(value: any): value is DragEvent {
 function getInputFiles(evt: Event) {
     const files = isInput(evt.target)
         ? evt.target.files
-            ? fromList<File>(evt.target.files)
+            ? fromList<FileWithPath>(evt.target.files)
             : []
         : [];
-    return files.map(file => toFileWithPath(file));
+    return files.map(file => ensureFileWithPath(file));
 }
 
 function isInput(value: EventTarget | null): value is HTMLInputElement {
@@ -52,8 +52,8 @@ async function getDataTransferFiles(dt: DataTransfer, type: string) {
         return noIgnoredFiles(flatten<FileWithPath>(files));
     }
 
-    return noIgnoredFiles(fromList<File>(dt.files)
-        .map(file => toFileWithPath(file)));
+    return noIgnoredFiles(fromList<FileWithPath>(dt.files)
+        .map(file => ensureFileWithPath(file)));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {
@@ -106,7 +106,7 @@ function fromDataTransferItem(item: DataTransferItem) {
     if (!file) {
         return Promise.reject(`${item} is not a File`);
     }
-    const fwp = toFileWithPath(file);
+    const fwp = ensureFileWithPath(file);
     return Promise.resolve(fwp);
 }
 
@@ -153,8 +153,8 @@ function fromDirEntry(entry: any) {
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
 async function fromFileEntry(entry: any) {
     return new Promise<FileWithPath>((resolve, reject) => {
-        entry.file((file: File) => {
-            const fwp = toFileWithPath(file, entry.fullPath);
+        entry.file((file: FileWithPath) => {
+            const fwp = ensureFileWithPath(file, entry.fullPath);
             resolve(fwp);
         }, (err: any) => {
             reject(err);

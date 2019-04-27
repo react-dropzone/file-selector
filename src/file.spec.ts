@@ -1,10 +1,10 @@
 // tslint:disable: forin
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {COMMON_MIME_TYPES, ensureFileWithPath} from './file';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
         const file = new File([], 'test.json');
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
         expect(fileWithPath).toBeInstanceOf(File);
     });
 
@@ -12,21 +12,31 @@ describe('toFile()', () => {
         const type = 'application/json';
         const opts: FilePropertyBag = {type};
         const file = new File([], 'test.json', opts);
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
         expect(fileWithPath.type).toBe(type);
+    });
+
+    it('does not overwrite {path} if it exists', () => {
+        const fullPath = '/Users/test/Desktop/test/test.json';
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        // @ts-ignore
+        file.path = fullPath; // this is set only in the case of an electron app
+        const fileWithPath = ensureFileWithPath(file, path);
+        expect(fileWithPath.path).toBe(fullPath);
     });
 
     it('sets the {path} if provided', () => {
         const path = '/test/test.json';
         const file = new File([], 'test.json');
-        const fileWithPath = toFileWithPath(file, path);
+        const fileWithPath = ensureFileWithPath(file, path);
         expect(fileWithPath.path).toBe(path);
     });
 
     test('{path} is enumerable', () => {
         const path = '/test/test.json';
         const file = new File([], 'test.json');
-        const fileWithPath = toFileWithPath(file, path);
+        const fileWithPath = ensureFileWithPath(file, path);
 
         expect(Object.keys(fileWithPath)).toContain('path');
 
@@ -41,7 +51,7 @@ describe('toFile()', () => {
     it('uses the File {name} as {path} if not provided', () => {
         const name = 'test.json';
         const file = new File([], name);
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
         expect(fileWithPath.path).toBe(name);
     });
 
@@ -51,7 +61,7 @@ describe('toFile()', () => {
         Object.defineProperty(file, 'webkitRelativePath', {
             value: path
         });
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
         expect(fileWithPath.path).toBe(path);
     });
 
@@ -59,7 +69,7 @@ describe('toFile()', () => {
         const types = Array.from(COMMON_MIME_TYPES.values());
         const files = Array.from(COMMON_MIME_TYPES.keys())
             .map(ext => new File([], `test.${ext}`))
-            .map(f => toFileWithPath(f));
+            .map(f => ensureFileWithPath(f));
 
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);
@@ -68,7 +78,7 @@ describe('toFile()', () => {
 
     test('{type} is enumerable', () => {
         const file = new File([], 'test.gif');
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
 
         expect(Object.keys(fileWithPath)).toContain('type');
 
@@ -85,7 +95,7 @@ describe('toFile()', () => {
         const files = Array.from(COMMON_MIME_TYPES.keys())
             .map(key => key.toUpperCase())
             .map(ext => new File([], `test.${ext}`))
-            .map(f => toFileWithPath(f));
+            .map(f => ensureFileWithPath(f));
 
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);
@@ -96,7 +106,7 @@ describe('toFile()', () => {
         const data = {ping: true};
         const json = JSON.stringify(data);
         const file = new File([json], 'test.json');
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = ensureFileWithPath(file);
 
         const reader = new FileReader();
         reader.onload = evt => {

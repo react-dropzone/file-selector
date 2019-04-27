@@ -15,22 +15,25 @@ export const COMMON_MIME_TYPES = new Map([
 ]);
 
 
-export function toFileWithPath(file: File, path?: string): FileWithPath {
+export function ensureFileWithPath(file: FileWithPath, path?: string): FileWithPath {
     const f = withMimeType(file);
-    const {webkitRelativePath} = file as FileWithWebkitPath;
-    Object.defineProperty(f, 'path', {
-        value: typeof path === 'string'
-            ? path
-            // If <input webkitdirectory> is set,
-            // the File will have a {webkitRelativePath} property
-            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
-            : typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
-                ? webkitRelativePath
-                : file.name,
-        writable: false,
-        configurable: false,
-        enumerable: true
-    });
+    if (!('path' in f)) { // on electron, path is already set to the absolute path
+        const {webkitRelativePath} = file as FileWithWebkitPath;
+        Object.defineProperty(f, 'path', {
+            value: typeof path === 'string'
+                ? path
+                // If <input webkitdirectory> is set,
+                // the File will have a {webkitRelativePath} property
+                // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+                : typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
+                    ? webkitRelativePath
+                    : file.name,
+            writable: false,
+            configurable: false,
+            enumerable: true
+        });
+    }
+
     return f;
 }
 
@@ -42,7 +45,7 @@ interface FileWithWebkitPath extends File {
     readonly webkitRelativePath?: string;
 }
 
-function withMimeType(file: File) {
+function withMimeType(file: FileWithPath) {
     const {name} = file;
     const hasExtension = name && name.lastIndexOf('.') !== -1;
 
