@@ -15,7 +15,7 @@ export const COMMON_MIME_TYPES = new Map([
 ]);
 
 
-export function ensureFileWithPath(file: FileWithPath, path?: string): FileWithPath {
+export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath {
     const f = withMimeType(file);
     if (!('path' in f)) { // on electron, path is already set to the absolute path
         const {webkitRelativePath} = file as FileWithWebkitPath;

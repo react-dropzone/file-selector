@@ -1,4 +1,4 @@
-import {ensureFileWithPath, FileWithPath} from './file';
+import {toFileWithPath, FileWithPath} from './file';
 
 
 const FILES_TO_IGNORE = [
@@ -30,7 +30,7 @@ function getInputFiles(evt: Event) {
             ? fromList<FileWithPath>(evt.target.files)
             : []
         : [];
-    return files.map(file => ensureFileWithPath(file));
+    return files.map(file => toFileWithPath(file));
 }
 
 function isInput(value: EventTarget | null): value is HTMLInputElement {
@@ -53,7 +53,7 @@ async function getDataTransferFiles(dt: DataTransfer, type: string) {
     }
 
     return noIgnoredFiles(fromList<FileWithPath>(dt.files)
-        .map(file => ensureFileWithPath(file)));
+        .map(file => toFileWithPath(file)));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {
@@ -106,7 +106,7 @@ function fromDataTransferItem(item: DataTransferItem) {
     if (!file) {
         return Promise.reject(`${item} is not a File`);
     }
-    const fwp = ensureFileWithPath(file);
+    const fwp = toFileWithPath(file);
     return Promise.resolve(fwp);
 }
 
@@ -154,7 +154,7 @@ function fromDirEntry(entry: any) {
 async function fromFileEntry(entry: any) {
     return new Promise<FileWithPath>((resolve, reject) => {
         entry.file((file: FileWithPath) => {
-            const fwp = ensureFileWithPath(file, entry.fullPath);
+            const fwp = toFileWithPath(file, entry.fullPath);
             resolve(fwp);
         }, (err: any) => {
             reject(err);
