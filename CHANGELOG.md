@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.12"></a>
+## [0.1.12](https://github.com/react-dropzone/file-selector/compare/v0.1.11...v0.1.12) (2019-05-21)
+
+
+### Bug Fixes
+
+* use File {path} prop if it exists ([46c9209](https://github.com/react-dropzone/file-selector/commit/46c9209))
+
+
+
 <a name="0.1.11"></a>
 ## [0.1.11](https://github.com/react-dropzone/file-selector/compare/v0.1.10...v0.1.11) (2019-03-13)
 

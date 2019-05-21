@@ -1,6 +1,6 @@
 {
   "name": "file-selector",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Convert DataTransfer object to a list of File objects",
   "main": "./dist/index.js",
   "module": "./dist/es5/index.js",
