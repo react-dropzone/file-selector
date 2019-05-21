@@ -27,7 +27,7 @@ function isDragEvt(value: any): value is DragEvent {
 function getInputFiles(evt: Event) {
     const files = isInput(evt.target)
         ? evt.target.files
-            ? fromList<File>(evt.target.files)
+            ? fromList<FileWithPath>(evt.target.files)
             : []
         : [];
     return files.map(file => toFileWithPath(file));
@@ -52,7 +52,7 @@ async function getDataTransferFiles(dt: DataTransfer, type: string) {
         return noIgnoredFiles(flatten<FileWithPath>(files));
     }
 
-    return noIgnoredFiles(fromList<File>(dt.files)
+    return noIgnoredFiles(fromList<FileWithPath>(dt.files)
         .map(file => toFileWithPath(file)));
 }
 
@@ -153,7 +153,7 @@ function fromDirEntry(entry: any) {
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
 async function fromFileEntry(entry: any) {
     return new Promise<FileWithPath>((resolve, reject) => {
-        entry.file((file: File) => {
+        entry.file((file: FileWithPath) => {
             const fwp = toFileWithPath(file, entry.fullPath);
             resolve(fwp);
         }, (err: any) => {

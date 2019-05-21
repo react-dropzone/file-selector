@@ -16,6 +16,16 @@ describe('toFile()', () => {
         expect(fileWithPath.type).toBe(type);
     });
 
+    it('does not overwrite {path} if it exists', () => {
+        const fullPath = '/Users/test/Desktop/test/test.json';
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        // @ts-ignore
+        file.path = fullPath; // this is set only in the case of an electron app
+        const fileWithPath = toFileWithPath(file, path);
+        expect(fileWithPath.path).toBe(fullPath);
+    });
+
     it('sets the {path} if provided', () => {
         const path = '/test/test.json';
         const file = new File([], 'test.json');
