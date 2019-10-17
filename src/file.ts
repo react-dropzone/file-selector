@@ -37,11 +37,16 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
     return f;
 }
 
-export interface FileWithPath extends File {
+// Copy of File from lib.dom.d.ts with a different Name to prevent library collision
+interface _File extends Blob {
+    readonly lastModified: number;
+    readonly name: string;
+}
+export interface FileWithPath extends _File {
     readonly path?: string;
 }
 
-interface FileWithWebkitPath extends File {
+interface FileWithWebkitPath extends _File {
     readonly webkitRelativePath?: string;
 }
 
