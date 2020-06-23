@@ -37,7 +37,12 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
     return f;
 }
 
-export interface FileWithPath extends File {
+interface DOMFile extends Blob {
+    readonly lastModified: number;
+    readonly name: string;
+}
+
+export interface FileWithPath extends DOMFile {
     readonly path?: string;
 }
 
