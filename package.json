@@ -37,13 +37,7 @@
     "lint:fix": "yarn run lint -- --fix",
     "pretest:cov": "yarn run lint",
     "test:cov": "jest --coverage",
-    "test": "jest --watch",
-    "release": "standard-version"
-  },
-  "standard-version": {
-    "scripts": {
-      "prerelease": "yarn test:cov"
-    }
+    "test": "jest --watch"
   },
   "dependencies": {
     "tslib": "^2.0.1"
@@ -62,7 +56,6 @@
     "rollup": "^2.26.10",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-terser": "^7.0.2",
-    "standard-version": "^9.0.0",
     "ts-jest": "^26.3.0",
     "tslint": "^6.1.3",
     "typescript": "^4.0.2"
