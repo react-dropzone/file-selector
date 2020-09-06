@@ -325,12 +325,12 @@ function fileSystemFileEntryFromFile(file: File, err?: any): FileEntry {
 }
 
 function fileSystemDirEntryFromFile(
-    files: Array<FileEntry | DirEntry>,
+    files: FileOrDirEntry[],
     batchSize: number = 1,
     throwAfter: number = 0
 ): DirEntry {
     const copy = files.slice(0);
-    const batches: Array<Array<FileEntry | DirEntry>> = [];
+    const batches: FileOrDirEntry[][] = [];
 
     let current = 0;
     while (copy.length) {
@@ -390,6 +390,8 @@ function sortFiles<T extends File>(files: T[]) {
 }
 
 
+type FileOrDirEntry = FileEntry | DirEntry
+
 interface FileEntry extends Entry {
     file(
         cb: (file: File) => void,
@@ -408,7 +410,7 @@ interface Entry {
 
 interface DirReader {
     readEntries(
-        cb: (entries: Array<FileEntry | DirEntry>) => void,
+        cb: (entries: FileOrDirEntry[]) => void,
         errCb: (err: any) => void
     ): void;
 }

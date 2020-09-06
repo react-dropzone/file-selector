@@ -14,7 +14,7 @@ const FILES_TO_IGNORE = [
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
  * @param evt
  */
-export async function fromEvent(evt: Event): Promise<Array<FileWithPath | DataTransferItem>> {
+export async function fromEvent(evt: Event): Promise<(FileWithPath | DataTransferItem)[]> {
     return isDragEvt(evt) && evt.dataTransfer
         ? getDataTransferFiles(evt.dataTransfer, evt.type)
         : getInputFiles(evt);
@@ -120,7 +120,7 @@ function fromDirEntry(entry: any) {
     const reader = entry.createReader();
 
     return new Promise<FileArray[]>((resolve, reject) => {
-        const entries: Array<Promise<FileValue[]>> = [];
+        const entries: Promise<FileValue[]>[] = [];
 
         function readEntries() {
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader

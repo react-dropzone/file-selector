@@ -1,15 +1,15 @@
 const camelCase = require('camelcase');
-const commonjs = require('rollup-plugin-commonjs');
-const resolve = require('rollup-plugin-node-resolve');
+const commonjs = require('@rollup/plugin-commonjs');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
 const sourcemaps = require('rollup-plugin-sourcemaps');
-const {uglify} = require('rollup-plugin-uglify');
+const {terser} = require('rollup-plugin-terser');
 
 const pckg = require('./package.json');
 const name = pckg.name;
 const input = pckg.module;
 
 const plugins = [
-    resolve(),
+    nodeResolve(),
     commonjs(),
     sourcemaps()
 ];
@@ -46,7 +46,7 @@ export default [{
     input,
     plugins: [
         ...plugins,
-        uglify()
+        terser()
     ],
     external,
     output: {
