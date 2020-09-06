@@ -2,8 +2,9 @@
 
 > A small package for converting a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) or [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file) to a list of File objects.
 
-[![Travis CI](https://img.shields.io/travis/react-dropzone/file-selector/master.svg?style=flat-square)](https://travis-ci.org/react-dropzone/file-selector)
-
+[![npm](https://img.shields.io/npm/v/file-selector.svg?style=flat-square)](https://www.npmjs.com/package/file-selector)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/react-dropzone/file-selector/Test?label=tests&style=flat-square)](https://github.com/react-dropzone/file-selector/actions?query=workflow%3ATest)
+[![Coveralls github branch](https://img.shields.io/coveralls/github/react-dropzone/file-selector/master?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=master)
 
 # Table of Contents
 
