@@ -7,7 +7,7 @@
   "es2015": "./dist/es2015/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
-    "./dist",
+    "./dist/**/*",
     "./LICENSE"
   ],
   "keywords": [
