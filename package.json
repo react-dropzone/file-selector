@@ -6,7 +6,10 @@
   "module": "./dist/es5/index.js",
   "es2015": "./dist/es2015/index.js",
   "typings": "./dist/index.d.ts",
-  "files": ["./LICENSE"],
+  "files": [
+    "./dist",
+    "./LICENSE"
+  ],
   "keywords": [
     "drag-and-drop",
     "html5",
