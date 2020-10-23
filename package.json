@@ -7,8 +7,8 @@
   "es2015": "./dist/es2015/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
-    "./dist/**/*",
-    "./LICENSE"
+    "dist/**/*",
+    "LICENSE"
   ],
   "keywords": [
     "drag-and-drop",
