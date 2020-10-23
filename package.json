@@ -1,11 +1,12 @@
 {
   "name": "file-selector",
-  "version": "0.1.12",
+  "version": "0.0.0-development",
   "description": "Convert DataTransfer object to a list of File objects",
   "main": "./dist/index.js",
   "module": "./dist/es5/index.js",
   "es2015": "./dist/es2015/index.js",
   "typings": "./dist/index.d.ts",
+  "files": ["./LICENSE"],
   "keywords": [
     "drag-and-drop",
     "html5",
