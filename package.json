@@ -9,6 +9,7 @@
   "files": [
     "dist/**/*",
     "src/*",
+    "!*.spec.*",
     "LICENSE"
   ],
   "keywords": [
