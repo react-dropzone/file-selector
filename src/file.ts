@@ -9,6 +9,7 @@ export const COMMON_MIME_TYPES = new Map([
     ['mp4', 'video/mp4'],
     ['pdf', 'application/pdf'],
     ['png', 'image/png'],
+    ['csv', 'text/csv'],
     ['zip', 'application/zip'],
     ['doc', 'application/msword'],
     ['docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
