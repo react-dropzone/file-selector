@@ -19,9 +19,9 @@ const FILES_TO_IGNORE = [
  * @param evt
  */
 export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
-    if (isDragEvt(evt) && evt.dataTransfer) {
+    if (isObject<DragEvent>(evt) && isDataTransfer(evt)) {
         return getDataTransferFiles(evt.dataTransfer, evt.type);
-    } else if (evt instanceof Event) {
+    } else if (isChangeEvt(evt)) {
         return getInputFiles(evt);
     } else if (Array.isArray(evt) && evt.every(item => 'getFile' in item && typeof item.getFile === 'function')) {
         return getFsHandleFiles(evt)
@@ -29,17 +29,20 @@ export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataT
     return [];
 }
 
-function isDragEvt(value: any): value is DragEvent {
-    return !!value.dataTransfer;
+function isDataTransfer(value: any): value is DataTransfer {
+    return isObject(value.dataTransfer);
+}
+
+function isChangeEvt(value: any): value is Event {
+    return isObject<Event>(value) && isObject(value.target);
+}
+
+function isObject<T>(v: any): v is T {
+    return typeof v === 'object' && v !== null
 }
 
 function getInputFiles(evt: Event) {
-    const files = isInput(evt.target)
-        ? evt.target.files
-            ? fromList<FileWithPath>(evt.target.files)
-            : []
-        : [];
-    return files.map(file => toFileWithPath(file));
+    return fromList<FileWithPath>((evt.target as HTMLInputElement).files).map(file => toFileWithPath(file));
 }
 
 // Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
@@ -48,11 +51,12 @@ async function getFsHandleFiles(handles: any[]) {
     return files.map(file => toFileWithPath(file));
 }
 
-function isInput(value: EventTarget | null): value is HTMLInputElement {
-    return value !== null;
-}
 
-async function getDataTransferFiles(dt: DataTransfer, type: string) {
+async function getDataTransferFiles(dt: DataTransfer | null, type: string) {
+    if (dt === null) {
+        return [];
+    }
+
     // IE11 does not support dataTransfer.items
     // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items#Browser_compatibility
     if (dt.items) {
@@ -79,7 +83,11 @@ function noIgnoredFiles(files: FileWithPath[]) {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#Browser_compatibility
 // https://developer.mozilla.org/en-US/docs/Web/API/FileList
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItemList
-function fromList<T>(items: DataTransferItemList | FileList): T[] {
+function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
+    if (items === null) {
+        return [];
+    }
+
     const files = [];
 
     // tslint:disable: prefer-for-of
