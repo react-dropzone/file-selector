@@ -12,12 +12,21 @@ const FILES_TO_IGNORE = [
  * Convert a DragEvent's DataTrasfer object to a list of File objects
  * NOTE: If some of the items are folders,
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
+ *
+ * EXPERIMENTAL: A list of https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle objects can also be passed as an arg
+ * and a list of File objects will be returned.
+ *
  * @param evt
  */
-export async function fromEvent(evt: Event): Promise<(FileWithPath | DataTransferItem)[]> {
-    return isDragEvt(evt) && evt.dataTransfer
-        ? getDataTransferFiles(evt.dataTransfer, evt.type)
-        : getInputFiles(evt);
+export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
+    if (isDragEvt(evt) && evt.dataTransfer) {
+        return getDataTransferFiles(evt.dataTransfer, evt.type);
+    } else if (evt instanceof Event) {
+        return getInputFiles(evt);
+    } else if (Array.isArray(evt) && evt.every(item => 'getFile' in item && typeof item.getFile === 'function')) {
+        return getFsHandleFiles(evt)
+    }
+    return [];
 }
 
 function isDragEvt(value: any): value is DragEvent {
@@ -30,6 +39,12 @@ function getInputFiles(evt: Event) {
             ? fromList<FileWithPath>(evt.target.files)
             : []
         : [];
+    return files.map(file => toFileWithPath(file));
+}
+
+// Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
+async function getFsHandleFiles(handles: any[]) {
+    const files = await Promise.all(handles.map(h => h.getFile()));
     return files.map(file => toFileWithPath(file));
 }
 

@@ -7,9 +7,8 @@ it('returns a Promise', async () => {
     expect(fromEvent(evt)).toBeInstanceOf(Promise);
 });
 
-it('should return an empty array if the passed event is not a DragEvent', async () => {
-    const evt = new Event('test');
-    const files = await fromEvent(evt);
+it('should return an empty array if the passed arg is not what we expect', async () => {
+    const files = await fromEvent({});
     expect(files).toHaveLength(0);
 });
 
@@ -33,6 +32,37 @@ it('should return the evt {target} {files} if the passed event is an input evt',
     expect(file.path).toBe(name);
 });
 
+it('should return an empty array if the evt {target} has no {files} prop', async () => {
+    const evt = inputEvtFromFiles();
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(0);
+});
+
+it('should return files if the arg is a list of FileSystemFileHandle', async () => {
+    const name = 'test.json';
+    const [mockFile, mockHandle] = createFileSystemFileHandle(name, {ping: true}, {
+        type: 'application/json'
+    });
+
+    const files = await fromEvent([mockHandle]);
+    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(name);
+});
+
+it('should return an empty array if the passed event is not a DragEvent', async () => {
+    const evt = new Event('test');
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(0);
+});
+
 it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11)', async () => {
     const name = 'test.json';
     const mockFile = createFile(name, {ping: true}, {
@@ -51,12 +81,6 @@ it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
     expect(file.path).toBe(name);
-});
-
-it('should return an empty array if the evt {target} has no {files} prop', async () => {
-    const evt = inputEvtFromFiles();
-    const files = await fromEvent(evt);
-    expect(files).toHaveLength(0);
 });
 
 it('should return files from DataTransfer {items} if the passed event is a DragEvent', async () => {
@@ -373,9 +397,14 @@ function inputEvtFromFiles(...files: File[]): Event {
             value: files
         });
     }
-    return {
-        target: input
-    } as any;
+    return new Proxy(new CustomEvent('input'), {
+        get(t, p, rcvr) {
+            if (p === 'target') {
+                return input;
+            }
+            return t[p];
+        }
+    });
 }
 
 function createFile<T>(name: string, data: T, options?: FilePropertyBag) {
@@ -384,11 +413,25 @@ function createFile<T>(name: string, data: T, options?: FilePropertyBag) {
     return file;
 }
 
+function createFileSystemFileHandle<T>(name: string, data: T, options?: FilePropertyBag): [File, FileSystemFileHandle] {
+    const json = JSON.stringify(data);
+    const file = new File([json], name, options);
+    return [file, {
+        getFile() {
+            return Promise.resolve(file);
+        }
+    }];
+}
+
 function sortFiles<T extends File>(files: T[]) {
     return files.slice(0)
         .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+
+interface FileSystemFileHandle {
+    getFile(): Promise<File>;
+}
 
 type FileOrDirEntry = FileEntry | DirEntry
 

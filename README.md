@@ -46,7 +46,7 @@ document.addEventListener('drop', async evt => {
 ---------
 
 #### ES6
-Convert a `DragEvent` to File objects:
+Convert a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) to File objects:
 ```ts
 import {fromEvent} from 'file-selector';
 document.addEventListener('drop', async evt => {
@@ -55,7 +55,7 @@ document.addEventListener('drop', async evt => {
 });
 ```
 
-Convert a file input to File objects:
+Convert a [change event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event) for an input type file to File objects:
 ```ts
 import {fromEvent} from 'file-selector';
 const input = document.getElementById('myInput');
@@ -64,6 +64,18 @@ input.addEventListener('change', async evt => {
     console.log(files);
 });
 ```
+
+Convert [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) items to File objects:
+```ts
+import {fromEvent} from 'file-selector';
+
+// Open file picker
+const handles = await window.showOpenFilePicker({multiple: true});
+// Get the files
+const files = await fromEvent(handles);
+console.log(files);
+```
+**NOTE** The above is experimental and subject to change.
 
 #### CommonJS
 Convert a `DragEvent` to File objects:

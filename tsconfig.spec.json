@@ -2,7 +2,8 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5"
+        "target": "es5",
+        "suppressImplicitAnyIndexErrors": true
     },
     "include": [
         "src/**/*.ts"
