@@ -21,7 +21,7 @@ export const COMMON_MIME_TYPES = new Map([
     ['gz', 'application/gzip'],
     ['gif', 'image/gif'],
     ['heic', 'image/heic'],
-    ['heic', 'image/heif'],
+    ['heif', 'image/heif'],
     ['htm', 'text/html'],
     ['html', 'text/html'],
     ['ico', 'image/vnd.microsoft.icon'],
