@@ -20,6 +20,8 @@ export const COMMON_MIME_TYPES = new Map([
     ['epub', 'application/epub+zip'],
     ['gz', 'application/gzip'],
     ['gif', 'image/gif'],
+    ['heic', 'image/heic'],
+    ['heif', 'image/heif'],
     ['htm', 'text/html'],
     ['html', 'text/html'],
     ['ico', 'image/vnd.microsoft.icon'],
