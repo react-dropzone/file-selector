@@ -88,7 +88,7 @@ export const COMMON_MIME_TYPES = new Map([
 export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath {
     const f = withMimeType(file);
     if (typeof f.path !== 'string') { // on electron, path is already set to the absolute path
-        const {webkitRelativePath} = file as FileWithWebkitPath;
+        const {webkitRelativePath} = file;
         Object.defineProperty(f, 'path', {
             value: typeof path === 'string'
                 ? path
@@ -107,17 +107,8 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
     return f;
 }
 
-interface DOMFile extends Blob {
-    readonly lastModified: number;
-    readonly name: string;
-}
-
-export interface FileWithPath extends DOMFile {
+export interface FileWithPath extends File {
     readonly path?: string;
-}
-
-interface FileWithWebkitPath extends File {
-    readonly webkitRelativePath?: string;
 }
 
 function withMimeType(file: FileWithPath) {

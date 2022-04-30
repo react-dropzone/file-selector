@@ -209,7 +209,7 @@ it('filters thumbnail cache files', async () => {
     expect(items).toHaveLength(0);
 });
 
-it('should throw if reading dir entries fails', async done => {
+it('should throw if reading dir entries fails', done => {
     const mockFiles = sortFiles([
         createFile('ping.json', {ping: true}),
         createFile('pong.json', {pong: true})
@@ -222,15 +222,12 @@ it('should throw if reading dir entries fails', async done => {
         ], 1, 1))
     ]);
 
-    try {
-        await fromEvent(evt);
-        done.fail('Getting the files should have failed');
-    } catch (err) {
-        done();
-    }
+    fromEvent(evt)
+        .then(() => done.fail('Getting the files should have failed'))
+        .catch(() => done());
 });
 
-it('should throw if reading file entry fails', async done => {
+it('should throw if reading file entry fails', done => {
     const mockFiles = sortFiles([
         createFile('ping.json', {ping: true}),
         createFile('pong.json', {pong: true})
@@ -243,24 +240,18 @@ it('should throw if reading file entry fails', async done => {
         ], 1, 1))
     ]);
 
-    try {
-        await fromEvent(evt);
-        done.fail('Getting the files should have failed');
-    } catch (err) {
-        done();
-    }
+    fromEvent(evt)
+        .then(() => done.fail('Getting the files should have failed'))
+        .catch(() => done());
 });
 
-it('should throw if DataTransferItem is not a File', async done => {
+it('should throw if DataTransferItem is not a File', done => {
     const item = dataTransferItem(null, 'file');
     const evt = dragEvtFromFilesAndItems([], [item]);
 
-    try {
-        await fromEvent(evt);
-        done.fail('Getting the files should have failed');
-    } catch (err) {
-        done();
-    }
+    fromEvent(evt)
+        .then(() => done.fail('Getting the files should have failed'))
+        .catch(() => done());
 });
 
 
@@ -402,7 +393,7 @@ function inputEvtFromFiles(...files: File[]): Event {
             if (p === 'target') {
                 return input;
             }
-            return t[p];
+            return (t as any)[p];
         }
     });
 }

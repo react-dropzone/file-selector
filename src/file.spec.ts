@@ -56,6 +56,7 @@ describe('toFile()', () => {
     });
 
     it('uses the File {webkitRelativePath} as {path} if it exists', () => {
+        const name = 'test.json';
         const path = 'test/test.json';
         const file = new File([], name);
         Object.defineProperty(file, 'webkitRelativePath', {
@@ -116,7 +117,7 @@ describe('toFile()', () => {
                 expect(d).toEqual(data);
                 done();
             } catch (e) {
-                done.fail(e);
+                done.fail(e as Error);
             }
         };
 
