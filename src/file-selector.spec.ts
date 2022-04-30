@@ -12,6 +12,11 @@ it('should return an empty array if the passed arg is not what we expect', async
     expect(files).toHaveLength(0);
 });
 
+it('should return an empty array if drag event', async () => {
+    const files = await fromEvent({});
+    expect(files).toHaveLength(0);
+});
+
 it('should return the evt {target} {files} if the passed event is an input evt', async () => {
     const name = 'test.json';
     const mockFile = createFile(name, {ping: true}, {

@@ -19,7 +19,7 @@ const FILES_TO_IGNORE = [
  * @param evt
  */
 export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
-    if (isObject<DragEvent>(evt) && isDataTransfer(evt)) {
+    if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
         return getDataTransferFiles(evt.dataTransfer, evt.type);
     } else if (isChangeEvt(evt)) {
         return getInputFiles(evt);
@@ -30,7 +30,7 @@ export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataT
 }
 
 function isDataTransfer(value: any): value is DataTransfer {
-    return isObject(value.dataTransfer);
+    return isObject(value);
 }
 
 function isChangeEvt(value: any): value is Event {
@@ -52,11 +52,7 @@ async function getFsHandleFiles(handles: any[]) {
 }
 
 
-async function getDataTransferFiles(dt: DataTransfer | null, type: string) {
-    if (dt === null) {
-        return [];
-    }
-
+async function getDataTransferFiles(dt: DataTransfer, type: string) {
     // IE11 does not support dataTransfer.items
     // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items#Browser_compatibility
     if (dt.items) {
