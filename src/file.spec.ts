@@ -1,5 +1,6 @@
 // tslint:disable: forin
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import { describe, expect, it, test } from '@jest/globals';
+import { COMMON_MIME_TYPES, toFileWithPath } from './file.js';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
@@ -40,7 +41,7 @@ describe('toFile()', () => {
 
         expect(Object.keys(fileWithPath)).toContain('path');
 
-        const keys = [];
+        const keys: string[] = [];
         for (const key in fileWithPath) {
             keys.push(key);
         }
@@ -83,7 +84,7 @@ describe('toFile()', () => {
 
         expect(Object.keys(fileWithPath)).toContain('type');
 
-        const keys = [];
+        const keys: string[] = [];
         for (const key in fileWithPath) {
             keys.push(key);
         }
@@ -117,7 +118,7 @@ describe('toFile()', () => {
                 expect(d).toEqual(data);
                 done();
             } catch (e) {
-                done.fail(e as Error);
+                done(e as Error);
             }
         };
 
