@@ -75,6 +75,8 @@ export const COMMON_MIME_TYPES = new Map([
     ['xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
     ['xml', 'application/xml'],
     ['xul', 'application/vnd.mozilla.xul+xml'],
+    ['yaml', 'application/x-yaml'],
+    ['yml', 'application/x-yaml'],
     ['zip', 'application/zip'],
     ['7z', 'application/x-7z-compressed'],
 
