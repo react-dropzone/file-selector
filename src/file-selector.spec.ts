@@ -1,7 +1,6 @@
 import {FileWithPath} from './file';
 import {fromEvent} from './file-selector';
 
-
 it('returns a Promise', async () => {
     const evt = new Event('test');
     expect(fromEvent(evt)).toBeInstanceOf(Promise);
@@ -34,7 +33,7 @@ it('should return the evt {target} {files} if the passed event is an input evt',
     expect(file.type).toBe(mockFile.type);
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
 });
 
 it('should return an empty array if the evt {target} has no {files} prop', async () => {
@@ -59,7 +58,7 @@ it('should return files if the arg is a list of FileSystemFileHandle', async () 
     expect(file.type).toBe(mockFile.type);
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
 });
 
 it('should return an empty array if the passed event is not a DragEvent', async () => {
@@ -85,7 +84,7 @@ it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11
     expect(file.type).toBe(mockFile.type);
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
 });
 
 it('should return files from DataTransfer {items} if the passed event is a DragEvent', async () => {
@@ -106,7 +105,32 @@ it('should return files from DataTransfer {items} if the passed event is a DragE
     expect(file.type).toBe(mockFile.type);
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
+});
+
+it('should use the {fullPath} for {path} if {webkitGetAsEntry} is supported and the items are FileSystemFileEntry', async () => {
+    const name = 'test.json';
+    const fullPath = '/testfolder/test.json'
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+
+    const file = fileSystemFileEntryFromFile(mockFile);
+    file.fullPath = fullPath
+    const item = dataTransferItemFromEntry(file, mockFile);
+    const evt = dragEvtFromFilesAndItems([], [item]);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
+
+    const [f] = files as FileWithPath[];
+
+    expect(f.name).toBe(mockFile.name);
+    expect(f.type).toBe(mockFile.type);
+    expect(f.size).toBe(mockFile.size);
+    expect(f.lastModified).toBe(mockFile.lastModified);
+    expect(f.path).toBe(fullPath);
 });
 
 it('skips DataTransfer {items} that are of kind "string"', async () => {
@@ -127,7 +151,7 @@ it('skips DataTransfer {items} that are of kind "string"', async () => {
     expect(file.type).toBe(mockFile.type);
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
 });
 
 it('can read a tree of directories recursively and return a flat list of FileWithPath objects', async () => {
@@ -277,7 +301,7 @@ it('should use getAsFileSystemHandle when available', async () => {
     expect(file.type).toBe(f.type);
     expect(file.size).toBe(f.size);
     expect(file.lastModified).toBe(f.lastModified);
-    expect(file.path).toBe(name);
+    expect(file.path).toBe(`./${name}`);
 });
 
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
@@ -477,6 +501,7 @@ interface DirEntry extends Entry {
 interface Entry {
     isDirectory: boolean;
     isFile: boolean;
+    fullPath?: string;
 }
 
 interface DirReader {

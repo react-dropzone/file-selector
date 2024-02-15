@@ -110,7 +110,7 @@ function toFilePromises(item: DataTransferItem) {
         return fromDirEntry(entry) as any;
     }
 
-    return fromDataTransferItem(item);
+    return fromDataTransferItem(item, entry);
 }
 
 function flatten<T>(items: any[]): T[] {
@@ -120,7 +120,7 @@ function flatten<T>(items: any[]): T[] {
     ], []);
 }
 
-function fromDataTransferItem(item: DataTransferItem) {
+function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
     if (typeof (item as any).getAsFileSystemHandle === 'function') {
         return (item as any).getAsFileSystemHandle()
             .then(async (h: any) => {
@@ -133,7 +133,7 @@ function fromDataTransferItem(item: DataTransferItem) {
     if (!file) {
         return Promise.reject(`${item} is not a File`);
     }
-    const fwp = toFileWithPath(file);
+    const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
     return Promise.resolve(fwp);
 }
 

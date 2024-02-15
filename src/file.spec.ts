@@ -52,7 +52,7 @@ describe('toFile()', () => {
         const name = 'test.json';
         const file = new File([], name);
         const fileWithPath = toFileWithPath(file);
-        expect(fileWithPath.path).toBe(name);
+        expect(fileWithPath.path).toBe(`./${name}`);
     });
 
     it('uses the File {webkitRelativePath} as {path} if it exists', () => {
@@ -64,6 +64,44 @@ describe('toFile()', () => {
         });
         const fileWithPath = toFileWithPath(file);
         expect(fileWithPath.path).toBe(path);
+    });
+
+    it('sets the {relativePath} if provided without overwriting {path}', () => {
+        const fullPath = '/Users/test/Desktop/test/test.json';
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+
+        // @ts-expect-error
+        file.path = fullPath;
+        const fileWithPath = toFileWithPath(file, path);
+        expect(fileWithPath.path).toBe(fullPath);
+        expect(fileWithPath.relativePath).toBe(path);
+    });
+
+    test('{relativePath} is enumerable', () => {
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        const fileWithPath = toFileWithPath(file, path);
+
+        expect(Object.keys(fileWithPath)).toContain('relativePath');
+
+        const keys: string[] = [];
+        for (const key in fileWithPath) {
+            keys.push(key);
+        }
+
+        expect(keys).toContain('relativePath');
+    });
+
+    it('uses the File {webkitRelativePath} as {relativePath} if it exists', () => {
+        const name = 'test.json';
+        const path = 'test/test.json';
+        const file = new File([], name);
+        Object.defineProperty(file, 'webkitRelativePath', {
+            value: path
+        });
+        const fileWithPath = toFileWithPath(file);
+        expect(fileWithPath.relativePath).toBe(path);
     });
 
     it('sets the {type} from extension', () => {
