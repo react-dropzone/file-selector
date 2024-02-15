@@ -110,7 +110,7 @@ function toFilePromises(item: DataTransferItem) {
         return fromDirEntry(entry) as any;
     }
 
-    return fromDataTransferItem(item);
+    return fromFileEntry(entry);
 }
 
 function flatten<T>(items: any[]): T[] {
