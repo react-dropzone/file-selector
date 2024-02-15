@@ -104,7 +104,7 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
         });
     }
 
-    //Always populate a relative path so that even electron apps have access to a relativePath value
+    // Always populate a relative path so that even electron apps have access to a relativePath value
     Object.defineProperty(f, 'relativePath', {
         value: typeof path === 'string'
             ? path
@@ -113,10 +113,10 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
             // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
             : typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
                 ? webkitRelativePath
-                : `/${file.name}`, //prepend forward slash (/) to ensure consistancy when path isn't supplied.
-            writable: false,
-            configurable: false,
-            enumerable: true
+                : `/${file.name}`, // prepend forward slash (/) to ensure consistancy when path isn't supplied.
+        writable: false,
+        configurable: false,
+        enumerable: true
     })
 
     return f;

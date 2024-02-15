@@ -71,7 +71,7 @@ describe('toFile()', () => {
         const path = '/test/test.json';
         const file = new File([], 'test.json');
 
-        //@ts-expect-error
+        // @ts-expect-error
         file.path = fullPath;
         const fileWithPath = toFileWithPath(file, path);
         expect(fileWithPath.path).toBe(fullPath);
@@ -108,7 +108,7 @@ describe('toFile()', () => {
         const name = 'test.json';
         const file = new File([], name);
         const fileWithPath = toFileWithPath(file);
-        expect(fileWithPath.relativePath).toBe("/"+name);
+        expect(fileWithPath.relativePath).toBe('/' + name);
     });
 
     it('sets the {type} from extension', () => {
