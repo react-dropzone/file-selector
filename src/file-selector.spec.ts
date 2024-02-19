@@ -1,6 +1,6 @@
-import {FileWithPath} from './file';
+import { FileWithPath } from './file';
 import {fromEvent} from './file-selector';
-
+const toFileWithPathSpy = jest.spyOn(jest.requireActual('./file'), 'toFileWithPath');
 
 it('returns a Promise', async () => {
     const evt = new Event('test');
@@ -107,6 +107,37 @@ it('should return files from DataTransfer {items} if the passed event is a DragE
     expect(file.size).toBe(mockFile.size);
     expect(file.lastModified).toBe(mockFile.lastModified);
     expect(file.path).toBe(name);
+});
+
+it('should call toFilePath with undefined path if {webkitGetAsEntry} is not a function', async () => {
+    toFileWithPathSpy.mockClear();
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+
+    const item = dataTransferItemFromFile(mockFile);
+    const evt = dragEvtFromFilesAndItems([], [item]);
+    await fromEvent(evt);
+    expect(toFileWithPathSpy).toBeCalledTimes(1);
+    expect(toFileWithPathSpy).toBeCalledWith(mockFile, undefined);
+});
+
+it('should call toFilePath with {fullPath} path if file can be converted into an Entry', async () => {
+    toFileWithPathSpy.mockClear();
+    const name = 'test.json';
+    const fullPath = '/testfolder/test.json'
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+
+    const file = fileSystemFileEntryFromFile(mockFile);
+    file.fullPath = fullPath
+    const item = dataTransferItemFromEntry(file, mockFile);
+    const evt = dragEvtFromFilesAndItems([], [item]);
+    await fromEvent(evt);
+    expect(toFileWithPathSpy).toBeCalledTimes(1);
+    expect(toFileWithPathSpy).toBeCalledWith(mockFile, fullPath);
 });
 
 it('skips DataTransfer {items} that are of kind "string"', async () => {
@@ -445,6 +476,7 @@ interface DirEntry extends Entry {
 interface Entry {
     isDirectory: boolean;
     isFile: boolean;
+    fullPath?: string;
 }
 
 interface DirReader {

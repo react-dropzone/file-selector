@@ -110,7 +110,7 @@ function toFilePromises(item: DataTransferItem) {
         return fromDirEntry(entry) as any;
     }
 
-    return fromFileEntry(entry);
+    return fromDataTransferItem(item);
 }
 
 function flatten<T>(items: any[]): T[] {
@@ -122,10 +122,16 @@ function flatten<T>(items: any[]): T[] {
 
 function fromDataTransferItem(item: DataTransferItem) {
     const file = item.getAsFile();
+
+    let fileAsEntry: FileSystemEntry | null = null;
+    if (typeof item.webkitGetAsEntry === 'function') {
+        fileAsEntry = item.webkitGetAsEntry();
+    }
+
     if (!file) {
         return Promise.reject(`${item} is not a File`);
     }
-    const fwp = toFileWithPath(file);
+    const fwp = toFileWithPath(file, fileAsEntry?.fullPath ?? undefined);
     return Promise.resolve(fwp);
 }
 
