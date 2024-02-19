@@ -1,24 +1,14 @@
 {
-    "compilerOptions": {
-        "rootDir": "./src",
-        "baseUrl": "./src",
-        "noEmit": false,
-        "downlevelIteration": true,
-        "sourceMap": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "strict": true,
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-        "lib": [
-            "dom",
-            "es2016"
-        ]
-    },
-    "files": [
-        "./src/index.ts"
-    ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "isolatedModules": true,
+    "importsNotUsedAsValues": "error"
+  }
 }

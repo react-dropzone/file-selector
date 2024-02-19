@@ -1,6 +1,6 @@
-import {FileWithPath} from './file';
-import {fromEvent} from './file-selector';
-
+import { expect, it } from '@jest/globals';
+import { fromEvent } from './file-selector.js';
+import type { FileWithPath } from './file.js';
 
 it('returns a Promise', async () => {
     const evt = new Event('test');
@@ -228,7 +228,7 @@ it('should throw if reading dir entries fails', done => {
     ]);
 
     fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
+        .then(() => done('Getting the files should have failed'))
         .catch(() => done());
 });
 
@@ -246,7 +246,7 @@ it('should throw if reading file entry fails', done => {
     ]);
 
     fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
+        .then(() => done('Getting the files should have failed'))
         .catch(() => done());
 });
 
@@ -255,7 +255,7 @@ it('should throw if DataTransferItem is not a File', done => {
     const evt = dragEvtFromFilesAndItems([], [item]);
 
     fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
+        .then(() => done('Getting the files should have failed'))
         .catch(() => done());
 });
 

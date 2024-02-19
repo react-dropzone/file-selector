@@ -21,34 +21,31 @@
 
 
 ## Installation
-You can install this package from [NPM](https://www.npmjs.com):
+You can install this package from [NPM](https://www.npmjs.com/package/file-selector):
 ```bash
-npm add file-selector
+npm install file-selector
 ```
 
-Or with [Yarn](https://yarnpkg.com/en):
+Or with [Yarn](https://yarnpkg.com/package/file-selector):
 ```bash
 yarn add file-selector
 ```
 
 ### CDN
-For CDN, you can use [unpkg](https://unpkg.com):
+If you need a CDN, you can use [Skypack](https://www.skypack.dev/view/file-selector):
+```html
+<script type="module">
+  import {fromEvent} from 'https://cdn.skypack.dev/file-selector';
 
-[https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js](https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js)
-
-The global namespace for file-selector is `fileSelector`:
-```js
-const {fromEvent} = fileSelector;
-document.addEventListener('drop', async evt => {
+  document.addEventListener('drop', async evt => {
     const files = await fromEvent(evt);
     console.log(files);
-});
+  });
+</script>
 ```
 
 
 ## Usage
-
-### ES6
 Convert a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) to File objects:
 ```ts
 import {fromEvent} from 'file-selector';
@@ -80,17 +77,6 @@ console.log(files);
 ```
 **NOTE** The above is experimental and subject to change.
 
-### CommonJS
-Convert a `DragEvent` to File objects:
-```ts
-const {fromEvent} = require('file-selector');
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
-    console.log(files);
-});
-```
-
-
 ## Browser Support
 Most browser support basic File selection with drag 'n' drop or file input:
 * [File API](https://developer.mozilla.org/en-US/docs/Web/API/File#Browser_compatibility)
@@ -98,7 +84,7 @@ Most browser support basic File selection with drag 'n' drop or file input:
 * [DataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#Browser_compatibility)
 * [`<input type="file">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Browser_compatibility)
 
-For folder drop we use the [FileSystem API](https://developer.mozilla.org/en-US/docs/Web/API/FileSystem) which has very limited support:
+For folder drop we use the [FileSystem API](https://developer.mozilla.org/en-US/docs/Web/API/FileSystem):
 * [DataTransferItem.getAsFile()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/getAsFile#Browser_compatibility)
 * [DataTransferItem.webkitGetAsEntry()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry#Browser_compatibility)
 * [FileSystemEntry](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry#Browser_compatibility)
