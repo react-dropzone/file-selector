@@ -9,8 +9,7 @@
   "files": [
     "dist/**/*",
     "src/*",
-    "!*.spec.*",
-    "LICENSE"
+    "!*.spec.*"
   ],
   "keywords": [
     "drag-and-drop",
