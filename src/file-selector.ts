@@ -95,6 +95,8 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
     return files as any;
 }
 
+// TODO: https://github.com/react-dropzone/react-dropzone/issues/1271
+// https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/getAsFileSystemHandle
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
 function toFilePromises(item: DataTransferItem) {
     if (typeof item.webkitGetAsEntry !== 'function') {
