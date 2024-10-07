@@ -122,8 +122,11 @@ function flatten<T>(items: any[]): T[] {
 
 function fromDataTransferItem(item: DataTransferItem) {
     if ('getAsFileSystemHandle' in DataTransferItem.prototype) {
-        return (item as any).getAsFileSystemHandle().then((fileSystemHandle: any) => fileSystemHandle.getFile())
-            .catch((error: { message: any; }) => error.message);
+        return (item as any).getAsFileSystemHandle().then((fileSystemHandle: any) => {
+            const file = fileSystemHandle.getFile();
+            file.handle = fileSystemHandle;
+            return file;
+        }).catch((error: { message: any; }) => error.message);
     }
     const file = item.getAsFile();
     if (!file) {
