@@ -122,7 +122,7 @@ function flatten<T>(items: any[]): T[] {
 
 function fromDataTransferItem(item: DataTransferItem) {
     if ('getAsFileSystemHandle' in DataTransferItem.prototype) {
-        return item.getAsFileSystemHandle().then((fileSystemHandle: any) => fileSystemHandle.getFile())
+        return (item as any).getAsFileSystemHandle().then((fileSystemHandle: any) => fileSystemHandle.getFile())
             .catch((error: { message: any; }) => error.message);
     }
     const file = item.getAsFile();
