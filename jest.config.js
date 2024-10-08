@@ -1,27 +1,12 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
-    testEnvironment: "jsdom",
-    globals: {
-        'ts-jest': {
-            tsconfig: './tsconfig.spec.json',
-            diagnostics: true
-        }
-    },
+    testEnvironment: 'jsdom',
     transform: {
-        '^.+\\.tsx?$': 'ts-jest'
+      '^.+.tsx?$': [
+        'ts-jest',
+        {
+          tsconfig: 'tsconfig.spec.json',
+        },
+      ],
     },
-    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
-    coveragePathIgnorePatterns: [
-        '<rootDir>/dist/',
-        '<rootDir>/node_modules/',
-        '<rootDir>/out-tsc/',
-        '<rootDir>/test/'
-    ],
-    moduleFileExtensions: [
-        'ts',
-        'tsx',
-        'js',
-        'jsx',
-        'json',
-        'node'
-    ]
 };
