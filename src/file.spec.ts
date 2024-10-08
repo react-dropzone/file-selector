@@ -40,7 +40,7 @@ describe('toFile()', () => {
 
         expect(Object.keys(fileWithPath)).toContain('path');
 
-        const keys = [];
+        const keys: string[] = [];
         for (const key in fileWithPath) {
             keys.push(key);
         }
@@ -83,7 +83,7 @@ describe('toFile()', () => {
 
         expect(Object.keys(fileWithPath)).toContain('type');
 
-        const keys = [];
+        const keys: string[] = [];
         for (const key in fileWithPath) {
             keys.push(key);
         }
