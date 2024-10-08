@@ -259,6 +259,26 @@ it('should throw if DataTransferItem is not a File', done => {
         .catch(() => done());
 });
 
+it('should use getAsFileSystemHandle when available', async () => {
+    const name = 'test.json';
+    const [f, h] = createFileSystemFileHandle(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const evt = dragEvtFromItems([
+        dataTransferItemWithFsHandle(f, h)
+    ]);
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(f.name);
+    expect(file.type).toBe(f.type);
+    expect(file.size).toBe(f.size);
+    expect(file.lastModified).toBe(f.lastModified);
+    expect(file.path).toBe(name);
+});
 
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
     return {
@@ -326,6 +346,18 @@ function dataTransferItemFromEntry(entry: FileEntry | DirEntry, file?: File): Da
         },
         webkitGetAsEntry: () => {
             return entry;
+        }
+    } as any;
+}
+
+function dataTransferItemWithFsHandle(file?: File, h?: FileSystemFileHandle): DataTransferItem {
+    return {
+        kind: 'file',
+        getAsFile() {
+            return file;
+        },
+        getAsFileSystemHandle() {
+            return Promise.resolve(h);
         }
     } as any;
 }

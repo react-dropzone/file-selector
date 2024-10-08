@@ -121,6 +121,14 @@ function flatten<T>(items: any[]): T[] {
 }
 
 function fromDataTransferItem(item: DataTransferItem) {
+    if (typeof (item as any).getAsFileSystemHandle === 'function') {
+        return (item as any).getAsFileSystemHandle()
+            .then(async (h: any) => {
+                const file = await h.getFile();
+                file.handle = h;
+                return toFileWithPath(file);
+            });
+    }
     const file = item.getAsFile();
     if (!file) {
         return Promise.reject(`${item} is not a File`);
