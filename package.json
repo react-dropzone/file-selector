@@ -29,7 +29,7 @@
     "url": "https://github.com/react-dropzone/file-selector.git"
   },
   "scripts": {
-    "prebuild": "yarn run clean",
+    "prebuild": "npm run clean",
     "build": "npm-run-all -s compile build:umd",
     "build:umd": "rollup -c ./rollup.config.mjs",
     "compile": "npm-run-all -p compile:es2015 compile:es5 compile:cjs compile:types",
@@ -39,8 +39,8 @@
     "compile:types": "tsc -p ./tsconfig.types.json",
     "clean": "rm -rf dist/*",
     "lint": "tslint -c tslint.json -p ./tsconfig.spec.json -t stylish",
-    "lint:fix": "yarn run lint -- --fix",
-    "pretest:cov": "yarn run lint",
+    "lint:fix": "npm run lint -- --fix",
+    "pretest:cov": "npm run lint",
     "test:cov": "jest --coverage",
     "test": "jest --watch"
   },
@@ -52,7 +52,7 @@
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/jest": "^29.5.13",
-    "@types/node": "^22.7.4",
+    "@types/node": "^22.7.5",
     "camelcase": "^8.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -64,6 +64,5 @@
   },
   "engines": {
     "node": ">= 12"
-  },
-  "packageManager": "yarn@1.22.22"
+  }
 }

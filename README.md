@@ -26,11 +26,6 @@ You can install this package from [NPM](https://www.npmjs.com):
 npm add file-selector
 ```
 
-Or with [Yarn](https://yarnpkg.com/en):
-```bash
-yarn add file-selector
-```
-
 ### CDN
 For CDN, you can use [unpkg](https://unpkg.com):
 
