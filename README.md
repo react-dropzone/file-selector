@@ -103,9 +103,7 @@ For folder drop we use the [FileSystem API](https://developer.mozilla.org/en-US/
 
 
 ## Contribute
-If you wish to contribute, please use the following guidelines:
-* Use [Conventional Commits](https://conventionalcommits.org)
-* Use `[ci skip]` in commit messages to skip a build
+Checkout the organization [CONTRIBUTING.md](https://github.com/react-dropzone/.github/blob/main/CONTRIBUTING.md).
 
 ## Credits
 * [html5-file-selector](https://github.com/quarklemotion/html5-file-selector)
