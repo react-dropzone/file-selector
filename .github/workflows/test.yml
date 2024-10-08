@@ -11,6 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node_version: [14, 16, 18, 20, 22]
 
@@ -20,10 +21,15 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node_version }}
+
+      - name: Install compatible NPM version
+        if: matrix.node_version == 14
+        run: npm install -g npm@^9
+
       - name: Install
-        run: yarn install --pure-lockfile --ignore-engines
+        run: npm ci
       - name: Test
-        run: yarn test:cov
+        run: npm run test:cov
       - uses: coverallsapp/github-action@v1.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
