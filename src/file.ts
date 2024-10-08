@@ -1201,7 +1201,7 @@ export const COMMON_MIME_TYPES = new Map([
 ]);
 
 
-export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath {
+export function toFileWithPath(file: FileWithPath, path?: string, h?: FileSystemHandle): FileWithPath {
     const f = withMimeType(file);
     if (typeof f.path !== 'string') { // on electron, path is already set to the absolute path
         const {webkitRelativePath} = file;
@@ -1219,12 +1219,20 @@ export function toFileWithPath(file: FileWithPath, path?: string): FileWithPath 
             enumerable: true
         });
     }
-
+    if (h !== undefined) {
+        Object.defineProperty(f, 'handle', {
+            value: h,
+            writable: false,
+            configurable: false,
+            enumerable: true
+        });
+    }
     return f;
 }
 
 export interface FileWithPath extends File {
     readonly path?: string;
+    readonly handle?: FileSystemFileHandle;
 }
 
 function withMimeType(file: FileWithPath) {

@@ -123,4 +123,38 @@ describe('toFile()', () => {
 
         reader.readAsText(fileWithPath);
     });
+
+    it('sets the {handle} if provided', () => {
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        const fileWithHandle = toFileWithPath(file, path, fsHandleFromFile(file));
+        expect(fileWithHandle.handle).toBeDefined();
+        expect(fileWithHandle.handle?.name).toEqual(file.name);
+    });
+
+    test('{handle} is enumerable', () => {
+        const path = '/test/test.json';
+        const file = new File([], 'test.json');
+        const fileWithHandle = toFileWithPath(file, path, fsHandleFromFile(file));
+
+        expect(Object.keys(fileWithHandle)).toContain('handle');
+
+        const keys: string[] = [];
+        for (const key in fileWithHandle) {
+            keys.push(key);
+        }
+
+        expect(keys).toContain('handle');
+    });
+
 });
+
+function fsHandleFromFile(f: File): FileSystemHandle {
+    return {
+        kind: 'file',
+        name: f.name,
+        isSameEntry() {
+            return Promise.resolve(false)
+        }
+    }
+}
