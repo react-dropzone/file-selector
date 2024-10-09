@@ -126,7 +126,7 @@ function fromDataTransferItem(item: DataTransferItem) {
             const file = fileSystemHandle.getFile();
             file.handle = fileSystemHandle;
             return file;
-        }).catch((error: { message: any; }) => error.message);
+        });
     }
     const file = item.getAsFile();
     if (!file) {
