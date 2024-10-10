@@ -21,70 +21,115 @@
 
 
 ## Installation
-You can install this package from [NPM](https://www.npmjs.com):
+
+You can install this package from [NPM](https://www.npmjs.com/package/file-selector):
+
 ```bash
 npm add file-selector
 ```
 
-### CDN
-For CDN, you can use [unpkg](https://unpkg.com):
+### Bundler
 
-[https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js](https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js)
+If you are using a bundler such as [Vite](https://vite.dev/) or [Webpack](https://webpack.js.org/) you can import the package directly:
 
-The global namespace for file-selector is `fileSelector`:
 ```js
-const {fromEvent} = fileSelector;
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
-    console.log(files);
-});
+import {fromEvent} from 'file-selector';
 ```
 
+### Browser
+
+To include the package directly in the browser without a bundling step you can choose to either use a CDN, or include the required files in your own project.
+
+#### CDN
+
+If you want to use a CDN, you can use [Skypack](https://www.skypack.dev/), or any other CDN of your choice. Make sure you are specifying a compatible version range to avoid unexpected breaking changes.
+
+```html
+<script type="module">
+    import {fromEvent} from 'https://cdn.skypack.dev/file-selector@^1.0.0';
+</script>
+```
+
+#### Self-hosted
+
+Self hosting is also possible, make sure to copy or link the contents of the NPM package into your project and import them as you would any other module.
+
+```html
+<script type="module">
+    import {fromEvent} from './path/to/file-selector.js';
+</script>
+```
+
+#### Import maps
+
+To avoid repeating the import path and get an experience similar to a bundler you can opt to use an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
+
+```html
+<script type="importmap">
+    {
+        "imports": {
+            // Using the CDN
+            "file-selector": "https://cdn.skypack.dev/file-selector@^1.0.0"
+            // Or a path to your own self-hosted version.
+            "file-selector": "./path/to/file-selector.js"
+        }
+    }
+</script>
+<script type="module">
+    import {fromEvent} from 'file-selector';
+</script>
+```
 
 ## Usage
 
-### ES6
 Convert a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) to File objects:
-```ts
+
+```js
 import {fromEvent} from 'file-selector';
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
+
+document.addEventListener('drop', async (event) => {
+    const files = await fromEvent(event);
     console.log(files);
 });
 ```
 
 Convert a [change event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event) for an input type file to File objects:
-```ts
+
+```js
 import {fromEvent} from 'file-selector';
+
 const input = document.getElementById('myInput');
-input.addEventListener('change', async evt => {
-    const files = await fromEvent(evt);
+input.addEventListener('change', async (event) => {
+    const files = await fromEvent(event);
     console.log(files);
 });
 ```
 
 Convert [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) items to File objects:
-```ts
+
+```js
 import {fromEvent} from 'file-selector';
 
-// Open file picker
 const handles = await window.showOpenFilePicker({multiple: true});
-// Get the files
 const files = await fromEvent(handles);
 console.log(files);
 ```
-**NOTE** The above is experimental and subject to change.
+
+> [!NOTE] 
+> The above is experimental and subject to change.
 
 ### CommonJS
+
 Convert a `DragEvent` to File objects:
-```ts
+
+```js
 const {fromEvent} = require('file-selector');
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
+
+document.addEventListener('drop', async (event) => {
+    const files = await fromEvent(event);
     console.log(files);
 });
 ```
-
 
 ## Browser Support
 Most browser support basic File selection with drag 'n' drop or file input:
