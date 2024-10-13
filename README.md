@@ -118,19 +118,6 @@ console.log(files);
 > [!NOTE] 
 > The above is experimental and subject to change.
 
-### CommonJS
-
-Convert a `DragEvent` to File objects:
-
-```js
-const {fromEvent} = require('file-selector');
-
-document.addEventListener('drop', async (event) => {
-    const files = await fromEvent(event);
-    console.log(files);
-});
-```
-
 ## Browser Support
 Most browser support basic File selection with drag 'n' drop or file input:
 * [File API](https://developer.mozilla.org/en-US/docs/Web/API/File#Browser_compatibility)
