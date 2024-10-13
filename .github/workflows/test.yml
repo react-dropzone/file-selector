@@ -5,41 +5,48 @@ on:
       - master
       - "[0-9]+.[0-9]+.x"
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 jobs:
   test:
+    name: Run tests on Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node_version: [14, 16, 18, 20, 22]
+        node-version: [14, 16, 18, 20, 22]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node_version }}
-        uses: actions/setup-node@v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: ${{ matrix.node-version }}
 
       - name: Install compatible NPM version
-        if: matrix.node_version == 14
+        if: matrix.node-version == 14
         run: npm install -g npm@^9
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
-      - name: Test
+
+      - name: Run tests
         run: npm run test:cov
-      - uses: coverallsapp/github-action@v1.0.1
+
+      - name: Collect coverage
+        uses: coverallsapp/github-action@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
 
   coverage:
+    name: Publish coverage
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: coverallsapp/github-action@v1.0.1
+      - name: Publish coverage
+        uses: coverallsapp/github-action@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
