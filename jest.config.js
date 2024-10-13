@@ -1,12 +1,15 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} **/
-module.exports = {
+import { createDefaultEsmPreset } from 'ts-jest'
+
+const defaultPreset = createDefaultEsmPreset()
+
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+const jestConfig = {
+    ...defaultPreset,
     testEnvironment: 'jsdom',
-    transform: {
-      '^.+.tsx?$': [
-        'ts-jest',
-        {
-          tsconfig: 'tsconfig.spec.json',
-        },
-      ],
-    },
-};
+    // Convert `.js` imports to one without an extension to support 'NodeNext' module resolution.
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1'
+    }
+}
+
+export default jestConfig
