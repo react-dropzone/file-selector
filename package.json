@@ -27,6 +27,9 @@
     "type": "git",
     "url": "https://github.com/react-dropzone/file-selector.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "prebuild": "npm run clean",
     "build": "npm-run-all -s compile build:umd",
