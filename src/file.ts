@@ -435,6 +435,8 @@ export const COMMON_MIME_TYPES = new Map([
     ['json', 'application/json'],
     ['json5', 'application/json5'],
     ['jsonld', 'application/ld+json'],
+    // https://jsonlines.org/
+    ['jsonl', 'application/jsonl'],
     ['jsonml', 'application/jsonml+json'],
     ['jsx', 'text/jsx'],
     ['jxr', 'image/jxr'],
