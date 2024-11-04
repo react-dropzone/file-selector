@@ -86,7 +86,6 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
 
     const files = [];
 
-    // tslint:disable: prefer-for-of
     for (let i = 0; i < items.length; i++) {
         const file = items[i];
         files.push(file);

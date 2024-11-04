@@ -1,5 +1,5 @@
-import {FileWithPath} from './file';
-import {fromEvent} from './file-selector';
+import {FileWithPath} from './file.js';
+import {fromEvent} from './file-selector.js';
 
 it('returns a Promise', async () => {
     const evt = new Event('test');
@@ -334,7 +334,6 @@ function dataTransferItemFromFile(file: File): DataTransferItem {
         getAsFile() {
             return file;
         },
-        // tslint:disable-next-line: no-empty
         getAsString() {}
     } as any;
 }
@@ -450,7 +449,7 @@ function inputEvtFromFiles(...files: File[]): Event {
         });
     }
     return new Proxy(new CustomEvent('input'), {
-        get(t, p, rcvr) {
+        get(t, p) {
             if (p === 'target') {
                 return input;
             }

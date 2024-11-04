@@ -1,5 +1,4 @@
-// tslint:disable: forin
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {COMMON_MIME_TYPES, toFileWithPath} from './file.js';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
@@ -20,8 +19,8 @@ describe('toFile()', () => {
         const fullPath = '/Users/test/Desktop/test/test.json';
         const path = '/test/test.json';
         const file = new File([], 'test.json');
-        // @ts-ignore
-        file.path = fullPath; // this is set only in the case of an electron app
+        // @ts-expect-error: This is set only in the case of an electron app
+        file.path = fullPath;
         const fileWithPath = toFileWithPath(file, path);
         expect(fileWithPath.path).toBe(fullPath);
     });
@@ -71,7 +70,7 @@ describe('toFile()', () => {
         const path = '/test/test.json';
         const file = new File([], 'test.json');
 
-        // @ts-expect-error
+        // @ts-expect-error: This is set only in the case of an electron app
         file.path = fullPath;
         const fileWithPath = toFileWithPath(file, path);
         expect(fileWithPath.path).toBe(fullPath);
@@ -149,9 +148,8 @@ describe('toFile()', () => {
 
         const reader = new FileReader();
         reader.onload = evt => {
-            const {result} = evt.target as any;
             try {
-                const d = JSON.parse(result);
+                const d = JSON.parse(evt.target?.result as string);
                 expect(d).toEqual(data);
                 done();
             } catch (e) {
