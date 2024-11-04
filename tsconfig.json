@@ -1,9 +1,9 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "NodeNext",
-        "strict": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true
-    }
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true
+  }
 }
