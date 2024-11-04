@@ -1,4 +1,4 @@
-name: Test
+name: CI
 on:
   push:
     branches:
@@ -9,13 +9,53 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
   test:
-    name: Run tests on Node.js ${{ matrix.node-version }}
+    name: Test on Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node_version: [18, 20, 22]
+        node-version: [18, 20, 22]
 
     steps:
       - name: Checkout repository
@@ -25,12 +65,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests
-        run: npm run test:cov
+        run: npm test -- --coverage
 
       - name: Collect coverage
         uses: coverallsapp/github-action@v2
