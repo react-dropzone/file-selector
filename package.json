@@ -38,7 +38,8 @@
     "build": "rm -rf dist && tsc -p ./tsconfig.build.json",
     "lint": "prettier . --check && eslint .",
     "lint:fix": "prettier --write . && eslint . --fix",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
@@ -47,8 +48,10 @@
     "@types/node": "^22.7.5",
     "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.6",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3",
@@ -56,5 +59,12 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "!(*.js|*.ts)": "prettier --write --ignore-unknown"
   }
 }
