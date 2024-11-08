@@ -304,6 +304,20 @@ it('should use getAsFileSystemHandle when available', async () => {
     expect(file.path).toBe(`./${name}`);
 });
 
+it('Reproduces Bug #106', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(name, {ping: true}, {
+        type: 'application/json'
+    });
+    const item = dataTransferItemWithFsHandle(mockFile, null);
+    const evt = dragEvtFromFilesAndItems([], [item]);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+    const [file] = files as FileWithPath[];
+    expect(file.path).toBe(`./${name}`);
+});
+
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
     return {
         type,
@@ -374,7 +388,7 @@ function dataTransferItemFromEntry(entry: FileEntry | DirEntry, file?: File): Da
     } as any;
 }
 
-function dataTransferItemWithFsHandle(file?: File, h?: FileSystemFileHandle): DataTransferItem {
+function dataTransferItemWithFsHandle(file?: File, h?: FileSystemFileHandle | null): DataTransferItem {
     return {
         kind: 'file',
         getAsFile() {
