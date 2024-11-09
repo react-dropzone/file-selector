@@ -44,10 +44,12 @@ function isObject<T>(v: any): v is T {
   return typeof v === "object" && v !== null;
 }
 
-function getInputFiles(evt: Event) {
-  return fromList<FileWithPath>((evt.target as HTMLInputElement).files).map(
-    (file) => toFileWithPath(file),
-  );
+function getInputFiles(event: Event): FileWithPath[] {
+  if (!(event.target instanceof HTMLInputElement) || !event.target.files) {
+    return [];
+  }
+
+  return Array.from(event.target.files).map((file) => toFileWithPath(file));
 }
 
 // Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
@@ -56,48 +58,23 @@ async function getFsHandleFiles(handles: any[]) {
   return files.map((file) => toFileWithPath(file));
 }
 
-async function getDataTransferFiles(dt: DataTransfer, type: string) {
-  // IE11 does not support dataTransfer.items
-  // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items#Browser_compatibility
-  if (dt.items) {
-    const items = fromList<DataTransferItem>(dt.items).filter(
-      (item) => item.kind === "file",
-    );
-    // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
-    // only 'dragstart' and 'drop' has access to the data (source node)
-    if (type !== "drop") {
-      return items;
-    }
-    const files = await Promise.all(items.map(toFilePromises));
-    return noIgnoredFiles(flatten<FileWithPath>(files));
+async function getDataTransferFiles(dataTransfer: DataTransfer, type: string) {
+  const items = Array.from(dataTransfer.items).filter(
+    (item) => item.kind === "file",
+  );
+
+  // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
+  // only 'dragstart' and 'drop' has access to the data (source node)
+  if (type !== "drop") {
+    return items;
   }
 
-  return noIgnoredFiles(
-    fromList<FileWithPath>(dt.files).map((file) => toFileWithPath(file)),
-  );
+  const files = await Promise.all(items.map(toFilePromises));
+  return noIgnoredFiles(flatten<FileWithPath>(files));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {
   return files.filter((file) => FILES_TO_IGNORE.indexOf(file.name) === -1);
-}
-
-// IE11 does not support Array.from()
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#Browser_compatibility
-// https://developer.mozilla.org/en-US/docs/Web/API/FileList
-// https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItemList
-function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
-  if (items === null) {
-    return [];
-  }
-
-  const files = [];
-
-  for (let i = 0; i < items.length; i++) {
-    const file = items[i];
-    files.push(file);
-  }
-
-  return files as any;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
