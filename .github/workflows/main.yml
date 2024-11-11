@@ -71,20 +71,13 @@ jobs:
         run: npm ci
 
       - name: Run tests
+        if: matrix.node-version != 22
+        run: npm test -- --coverage
+
+      - name: Run tests with coverage
+        if: matrix.node-version == 22
         run: npm test -- --coverage
 
       - name: Collect coverage
+        if: matrix.node-version == 22
         uses: coverallsapp/github-action@v2
-        with:
-          flag-name: run-${{ join(matrix.*, '-') }}
-          parallel: true
-
-  coverage:
-    name: Publish coverage
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Publish coverage
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true
