@@ -88,8 +88,8 @@ function toFilePromises(item: DataTransferItem) {
   // Safari supports dropping an image node from a different window and can be retrieved using
   // the DataTransferItem.getAsFile() API
   // NOTE: FileSystemEntry.file() throws if trying to get the file
-  if (entry && entry.isDirectory) {
-    return fromDirEntry(entry) as any;
+  if (entry && isDirectoryEntry(entry)) {
+    return fromDirectoryEntry(entry);
   }
 
   return fromDataTransferItem(item, entry);
@@ -124,63 +124,61 @@ function fromDataTransferItem(
   return Promise.resolve(fwp);
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
-async function fromEntry(entry: any) {
-  return entry.isDirectory ? fromDirEntry(entry) : fromFileEntry(entry);
+async function fromEntry(
+  entry: FileSystemEntry,
+): Promise<FileWithPath | FileArray[]> {
+  if (isDirectoryEntry(entry)) {
+    return fromDirectoryEntry(entry);
+  } else if (isFileEntry(entry)) {
+    return fromFileEntry(entry);
+  }
+
+  return [];
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry
-function fromDirEntry(entry: any) {
+async function fromDirectoryEntry(
+  entry: FileSystemDirectoryEntry,
+): Promise<FileArray[]> {
   const reader = entry.createReader();
+  const entries: Promise<FileValue[]>[] = [];
 
-  return new Promise<FileArray[]>((resolve, reject) => {
-    const entries: Promise<FileValue[]>[] = [];
+  while (true) {
+    const batch = await readEntries(reader);
 
-    function readEntries() {
-      // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
-      // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryReader/readEntries
-      reader.readEntries(
-        async (batch: any[]) => {
-          if (!batch.length) {
-            // Done reading directory
-            try {
-              const files = await Promise.all(entries);
-              resolve(files);
-            } catch (err) {
-              reject(err);
-            }
-          } else {
-            const items = Promise.all(batch.map(fromEntry));
-            entries.push(items);
-
-            // Continue reading
-            readEntries();
-          }
-        },
-        (err: any) => {
-          reject(err);
-        },
-      );
+    if (!batch.length) {
+      break;
     }
 
-    readEntries();
-  });
+    entries.push(Promise.all(batch.map(fromEntry)));
+  }
+
+  const files = await Promise.all(entries);
+  return files;
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
-async function fromFileEntry(entry: any) {
-  return new Promise<FileWithPath>((resolve, reject) => {
-    entry.file(
-      (file: FileWithPath) => {
-        const fwp = toFileWithPath(file, entry.fullPath);
-        resolve(fwp);
-      },
-      (err: any) => {
-        reject(err);
-      },
-    );
-  });
+async function fromFileEntry(
+  entry: FileSystemFileEntry,
+): Promise<FileWithPath> {
+  const file = await getFile(entry);
+  const fileWithPath = toFileWithPath(file, entry.fullPath);
+
+  return fileWithPath;
 }
+
+const isDirectoryEntry = (
+  entry: FileSystemEntry,
+): entry is FileSystemDirectoryEntry => entry.isDirectory;
+
+const isFileEntry = (entry: FileSystemEntry): entry is FileSystemFileEntry =>
+  entry.isFile;
+
+const getFile = (entry: FileSystemFileEntry): Promise<File> =>
+  new Promise((resolve, reject) => entry.file(resolve, reject));
+
+const readEntries = (
+  reader: FileSystemDirectoryReader,
+): Promise<FileSystemEntry[]> =>
+  new Promise((resolve, reject) => reader.readEntries(resolve, reject));
 
 // Infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
