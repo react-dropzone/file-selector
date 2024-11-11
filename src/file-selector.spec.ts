@@ -75,6 +75,22 @@ it("should return an empty array if the passed event is not a DragEvent", async 
   expect(files).toHaveLength(0);
 });
 
+it("should return an empty array if the dragged item not a directory or file", async () => {
+  const evt = dragEvtFromItems([
+    dataTransferItemFromEntry(
+      fileSystemDirEntryFromFile([
+        {
+          isDirectory: false,
+          isFile: false,
+        } as FileEntry,
+      ]),
+    ),
+  ]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(0);
+});
+
 it("should return files from DataTransfer {items} if the passed event is a DragEvent", async () => {
   const name = "test.json";
   const mockFile = createFile(
