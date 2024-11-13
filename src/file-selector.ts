@@ -108,34 +108,51 @@ function flatten<T>(items: any[]): T[] {
 async function fromDataTransferItem(
   item: DataTransferItem,
   entry?: FileSystemEntry | null,
-) {
-  // Check if we're in a secure context; due to a bug in Chrome (as far as we know) the browser crashes when calling this API (yet to be confirmed as a consistent behavior).
-  //
+): Promise<FileWithPath> {
+  const fileWithPath = await fromFileSystemHandle(item, entry);
+
+  if (fileWithPath) {
+    return fileWithPath;
+  }
+
+  const file = item.getAsFile();
+
+  if (!file) {
+    throw new Error("Transferred item is not a file.");
+  }
+
+  return toFileWithPath(file, entry?.fullPath);
+}
+
+async function fromFileSystemHandle(
+  item: DataTransferItem,
+  entry?: FileSystemEntry | null,
+): Promise<File | null> {
+  // Check if we're in a secure context; otherwise due to a bug in Chrome the browser can crash when calling this API.
   // See:
   // - https://issues.chromium.org/issues/40186242
   // - https://github.com/react-dropzone/react-dropzone/issues/1397
+  // If the browser does not support the API act as if the file could not be retrieved.
   if (
-    globalThis.isSecureContext &&
-    typeof (item as any).getAsFileSystemHandle === "function"
+    !globalThis.isSecureContext ||
+    !(typeof item.getAsFileSystemHandle === "function")
   ) {
-    const h = await (item as any).getAsFileSystemHandle();
-    if (h === null) {
-      throw new Error(`${item} is not a File`);
-    }
-    // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
-    // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
-    if (h !== undefined) {
-      const file = await h.getFile();
-      file.handle = h;
-      return toFileWithPath(file);
-    }
+    return null;
   }
-  const file = item.getAsFile();
-  if (!file) {
-    throw new Error(`${item} is not a File`);
+
+  const handle = await item.getAsFileSystemHandle();
+
+  // The handle can be undefined due to a browser bug, in this case we act as if the file could not be retrieved.
+  // See: https://github.com/react-dropzone/file-selector/issues/120
+  if (handle === undefined) {
+    return null;
   }
-  const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
-  return fwp;
+
+  if (!handle || !isFileHandle(handle)) {
+    throw new Error("Transferred item is not a file.");
+  }
+
+  return toFileWithPath(await handle.getFile(), entry?.fullPath, handle);
 }
 
 async function fromEntry(
@@ -179,6 +196,10 @@ async function fromFileEntry(
   return fileWithPath;
 }
 
+const isFileHandle = (
+  handle: FileSystemHandle,
+): handle is FileSystemFileHandle => handle.kind === "file";
+
 const isDirectoryEntry = (
   entry: FileSystemEntry,
 ): entry is FileSystemDirectoryEntry => entry.isDirectory;
@@ -193,6 +214,16 @@ const readEntries = (
   reader: FileSystemDirectoryReader,
 ): Promise<FileSystemEntry[]> =>
   new Promise((resolve, reject) => reader.readEntries(resolve, reject));
+
+declare global {
+  interface DataTransferItem {
+    // This method is not yet widely supported in all browsers, and is thus marked as optional.
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/getAsFileSystemHandle
+    // Additionally, this method is known to return `undefined` in some cases due to browser bugs.
+    // See: https://github.com/react-dropzone/file-selector/issues/120
+    getAsFileSystemHandle?(): Promise<FileSystemHandle | null | undefined>;
+  }
+}
 
 // Infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
