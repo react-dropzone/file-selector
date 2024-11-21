@@ -121,7 +121,13 @@ function flatten<T>(items: any[]): T[] {
 }
 
 function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
-    if (typeof (item as any).getAsFileSystemHandle === 'function') {
+    // Check if we're in a secure context; due to a bug in Chrome (as far as we know)
+    // the browser crashes when calling this API (yet to be confirmed as a consistent behaviour).
+    //
+    // See:
+    // - https://issues.chromium.org/issues/40186242
+    // - https://github.com/react-dropzone/react-dropzone/issues/1397
+    if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
         return (item as any).getAsFileSystemHandle()
             .then(async (h: any) => {
                 const file = await h.getFile();
