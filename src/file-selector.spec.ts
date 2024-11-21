@@ -344,6 +344,41 @@ it("should use getAsFileSystemHandle when available", async () => {
   expect(file.path).toBe(`./${name}`);
 });
 
+it("should not use getAsFileSystemHandle when not in a secure context", async () => {
+  const f1Name = "test.nosec.json";
+  const f1 = createFile(
+    f1Name,
+    { ping: false },
+    {
+      type: "application/json",
+    },
+  );
+  const [, h] = createFileSystemFileHandle(
+    "test.sec.json",
+    { ping: true },
+    {
+      type: "application/json",
+    },
+  );
+  const evt = dragEvtFromItems([dataTransferItemWithFsHandle(f1, h)]);
+
+  globalThis.isSecureContext = false;
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+  expect(files.every((file) => file instanceof File)).toBe(true);
+
+  const [file] = files as FileWithPath[];
+
+  expect(file.name).toBe(f1.name);
+  expect(file.type).toBe(f1.type);
+  expect(file.size).toBe(f1.size);
+  expect(file.lastModified).toBe(f1.lastModified);
+  expect(file.path).toBe(`./${f1Name}`);
+
+  globalThis.isSecureContext = true;
+});
+
 function dragEvtFromItems(
   items: DataTransferItem | DataTransferItem[],
   type: string = "drop",
@@ -519,8 +554,7 @@ function createFileSystemFileHandle<T>(
   data: T,
   options?: FilePropertyBag,
 ): [File, FileSystemFileHandle] {
-  const json = JSON.stringify(data);
-  const file = new File([json], name, options);
+  const file = createFile(name, data, options);
   return [
     file,
     {
