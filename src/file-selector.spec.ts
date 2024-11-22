@@ -1,5 +1,5 @@
 import { FileWithPath } from "./file.js";
-import { fromEvent } from "./file-selector.js";
+import { fromEvent, fromFileHandles } from "./file-selector.js";
 
 it("returns a Promise", async () => {
   const evt = new Event("test");
@@ -7,12 +7,7 @@ it("returns a Promise", async () => {
 });
 
 it("should return an empty array if the passed arg is not what we expect", async () => {
-  const files = await fromEvent({});
-  expect(files).toHaveLength(0);
-});
-
-it("should return an empty array if drag event", async () => {
-  const files = await fromEvent({});
+  const files = await fromEvent({} as Event);
   expect(files).toHaveLength(0);
 });
 
@@ -56,7 +51,7 @@ it("should return files if the arg is a list of FileSystemFileHandle", async () 
     },
   );
 
-  const files = await fromEvent([mockHandle]);
+  const files = await fromFileHandles([mockHandle]);
   expect(files).toHaveLength(1);
   expect(files.every((file) => file instanceof File)).toBe(true);
 

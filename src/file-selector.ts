@@ -11,25 +11,37 @@ const FILES_TO_IGNORE = [
  * NOTE: If some of the items are folders,
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
  *
- * EXPERIMENTAL: A list of https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle objects can also be passed as an arg
- * and a list of File objects will be returned.
- *
  * @param evt
  */
 export async function fromEvent(
-  evt: Event | any,
+  evt: Event,
 ): Promise<(FileWithPath | DataTransferItem)[]> {
   if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
     return getDataTransferFiles(evt.dataTransfer, evt.type);
   } else if (isChangeEvt(evt)) {
     return getInputFiles(evt);
-  } else if (
-    Array.isArray(evt) &&
-    evt.every((item) => "getFile" in item && typeof item.getFile === "function")
-  ) {
-    return getFsHandleFiles(evt);
   }
+
   return [];
+}
+
+/**
+ * Convert an array of `FileSystemHandle` objects to a list of `FileWithPath` objects.
+ *
+ * @param handles The array of handles to convert.
+ * @returns A promise that resolves to a list of converted `FileWithPath` objects.
+ */
+export function fromFileHandles(
+  handles: FileSystemFileHandle[],
+): Promise<FileWithPath[]> {
+  return Promise.all(handles.map((handle) => fromFileHandle(handle)));
+}
+
+async function fromFileHandle(
+  handle: FileSystemFileHandle,
+): Promise<FileWithPath> {
+  const file = await handle.getFile();
+  return toFileWithPath(file);
 }
 
 function isDataTransfer(value: any): value is DataTransfer {
@@ -50,12 +62,6 @@ function getInputFiles(event: Event): FileWithPath[] {
   }
 
   return Array.from(event.target.files).map((file) => toFileWithPath(file));
-}
-
-// Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
-async function getFsHandleFiles(handles: any[]) {
-  const files = await Promise.all(handles.map((h) => h.getFile()));
-  return files.map((file) => toFileWithPath(file));
 }
 
 async function getDataTransferFiles(dataTransfer: DataTransfer, type: string) {
