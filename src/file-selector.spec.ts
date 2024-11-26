@@ -333,6 +333,35 @@ it('should not use getAsFileSystemHandle when not in a secure context', async ()
     window.isSecureContext = true;
 });
 
+it('should reject when getAsFileSystemHandle resolves to null', async () => {
+    const evt = dragEvtFromItems([
+        dataTransferItemWithFsHandle(null, null)
+    ]);
+    expect(fromEvent(evt)).rejects.toThrow('[object Object] is not a File');
+});
+
+it('should fallback to getAsFile when getAsFileSystemHandle resolves to undefined', async () => {
+    const name = 'test.nosec.json';
+    const mockFile = createFile(name, {ping: false}, {
+        type: 'application/json'
+    });
+    const evt = dragEvtFromItems([
+        dataTransferItemWithFsHandle(mockFile, undefined)
+    ]);
+
+    const files = await fromEvent(evt);
+    expect(files).toHaveLength(1);
+    expect(files.every(file => file instanceof File)).toBe(true);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(`./${name}`);
+});
+
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
     return {
         type,
@@ -403,7 +432,7 @@ function dataTransferItemFromEntry(entry: FileEntry | DirEntry, file?: File): Da
     } as any;
 }
 
-function dataTransferItemWithFsHandle(file?: File, h?: FileSystemFileHandle): DataTransferItem {
+function dataTransferItemWithFsHandle(file?: File | null, h?: FileSystemFileHandle | null): DataTransferItem {
     return {
         kind: 'file',
         getAsFile() {
@@ -510,7 +539,7 @@ function sortFiles<T extends File>(files: T[]) {
 
 
 interface FileSystemFileHandle {
-    getFile(): Promise<File>;
+    getFile(): Promise<File | null>;
 }
 
 type FileOrDirEntry = FileEntry | DirEntry
