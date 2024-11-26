@@ -119,9 +119,16 @@ async function fromDataTransferItem(
     typeof (item as any).getAsFileSystemHandle === "function"
   ) {
     const h = await (item as any).getAsFileSystemHandle();
-    const file = await h.getFile();
-    file.handle = h;
-    return toFileWithPath(file);
+    if (h === null) {
+      throw new Error(`${item} is not a File`);
+    }
+    // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
+    // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
+    if (h !== undefined) {
+      const file = await h.getFile();
+      file.handle = h;
+      return toFileWithPath(file);
+    }
   }
   const file = item.getAsFile();
   if (!file) {
