@@ -120,7 +120,7 @@ function flatten<T>(items: any[]): T[] {
     ], []);
 }
 
-function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
+async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
     // Check if we're in a secure context; due to a bug in Chrome (as far as we know)
     // the browser crashes when calling this API (yet to be confirmed as a consistent behaviour).
     //
@@ -128,19 +128,17 @@ function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | 
     // - https://issues.chromium.org/issues/40186242
     // - https://github.com/react-dropzone/react-dropzone/issues/1397
     if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
-        return (item as any).getAsFileSystemHandle()
-            .then(async (h: any) => {
-                const file = await h.getFile();
-                file.handle = h;
-                return toFileWithPath(file);
-            });
+        const h = await (item as any).getAsFileSystemHandle();
+        const file = await h.getFile();
+        file.handle = h;
+        return toFileWithPath(file);
     }
     const file = item.getAsFile();
     if (!file) {
-        return Promise.reject(`${item} is not a File`);
+        throw new Error(`${item} is not a File`);
     }
     const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
-    return Promise.resolve(fwp);
+    return fwp;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
