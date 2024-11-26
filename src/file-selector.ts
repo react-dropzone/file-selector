@@ -18,27 +18,32 @@ export async function fromEvent(
 ): Promise<(FileWithPath | DataTransferItem)[]> {
   if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
     return getDataTransferFiles(evt.dataTransfer, evt.type);
-  } else if (isChangeEvt(evt)) {
-    return getInputFiles(evt);
   }
   return [];
 }
 
-function isDataTransfer(value: any): value is DataTransfer {
-  return isObject(value);
-}
-
-function isChangeEvt(value: any): value is Event {
-  return isObject<Event>(value) && isObject(value.target);
-}
-
-function isObject<T>(v: any): v is T {
-  return typeof v === "object" && v !== null;
-}
-
-function getInputFiles(event: Event): FileWithPath[] {
+/**
+ * Retrieves files from the `change` event of a file input element.
+ *
+ * @param event The `change` event of a file input element to retrieve files from.
+ * @throws If the event is not associated with a valid file input element.
+ * @returns An array of file objects retrieved from the event.
+ *
+ * @example
+ * ```js
+ * const input = document.getElementById("myInput");
+ * input.addEventListener("change", (event) => {
+ *   const files = fromChangeEvent(event);
+ *   console.log(files);
+ * });
+ * ```
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file|MDN - `<input type="file">`}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event|MDN - HTMLElement: `change` event}
+ */
+export function fromChangeEvent(event: Event): FileWithPath[] {
   if (!(event.target instanceof HTMLInputElement) || !event.target.files) {
-    return [];
+    throw new Error("Event is not associated with a valid file input element.");
   }
 
   return Array.from(event.target.files).map((file) => toFileWithPath(file));
@@ -70,6 +75,14 @@ async function fromFileHandle(
 ): Promise<FileWithPath> {
   const file = await handle.getFile();
   return toFileWithPath(file);
+}
+
+function isDataTransfer(value: any): value is DataTransfer {
+  return isObject(value);
+}
+
+function isObject<T>(v: any): v is T {
+  return typeof v === "object" && v !== null;
 }
 
 async function getDataTransferFiles(dataTransfer: DataTransfer, type: string) {
