@@ -337,7 +337,7 @@ it('should reject when getAsFileSystemHandle resolves to null', async () => {
     const evt = dragEvtFromItems([
         dataTransferItemWithFsHandle(null, null)
     ]);
-    expect(fromEvent(evt)).rejects.toThrow('[object Object] is not a File');
+    expect(fromEvent(evt)).rejects.toThrow('DataTransferItem is not a file');
 });
 
 it('should fallback to getAsFile when getAsFileSystemHandle resolves to undefined', async () => {

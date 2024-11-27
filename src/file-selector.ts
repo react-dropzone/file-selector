@@ -1,5 +1,5 @@
+import {UnexpectedObjectError} from './error';
 import {FileWithPath, toFileWithPath} from './file';
-
 
 const FILES_TO_IGNORE = [
     // Thumbnail cache files for macOS and Windows
@@ -130,7 +130,7 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
         const h = await (item as any).getAsFileSystemHandle();
         if (h === null) {
-            throw new Error(`${item} is not a File`);
+            throw new UnexpectedObjectError(item);
         }
         // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
         // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
@@ -142,7 +142,7 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     }
     const file = item.getAsFile();
     if (!file) {
-        throw new Error(`${item} is not a File`);
+        throw new UnexpectedObjectError(item);
     }
     const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
     return fwp;
