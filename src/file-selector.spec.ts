@@ -312,13 +312,13 @@ it("should throw if reading file entry fails", (done) => {
     .catch(() => done());
 });
 
-it("should throw if DataTransferItem is not a File", (done) => {
+it("should throw if DataTransferItem is not a File", async () => {
   const item = dataTransferItem(null, "file");
-  const evt = dragEvtFromFilesAndItems([], [item]);
+  const event = dragEvtFromFilesAndItems([], [item]);
 
-  fromEvent(evt)
-    .then(() => done.fail("Getting the files should have failed"))
-    .catch(() => done());
+  await expect(fromEvent(event)).rejects.toThrow(
+    "Transferred item is not a file.",
+  );
 });
 
 it("should use getAsFileSystemHandle when available", async () => {
@@ -380,8 +380,11 @@ it("should not use getAsFileSystemHandle when not in a secure context", async ()
 });
 
 it("should reject when getAsFileSystemHandle resolves to null", async () => {
-  const evt = dragEvtFromItems([dataTransferItemWithFsHandle(null, null)]);
-  expect(fromEvent(evt)).rejects.toThrow("[object Object] is not a File");
+  const event = dragEvtFromItems([dataTransferItemWithFsHandle(null, null)]);
+
+  await expect(fromEvent(event)).rejects.toThrow(
+    "Transferred item is not a file.",
+  );
 });
 
 it("should fallback to getAsFile when getAsFileSystemHandle resolves to undefined", async () => {
@@ -408,6 +411,16 @@ it("should fallback to getAsFile when getAsFileSystemHandle resolves to undefine
   expect(file.size).toBe(mockFile.size);
   expect(file.lastModified).toBe(mockFile.lastModified);
   expect(file.path).toBe(`./${name}`);
+});
+
+it("should throw if getAsFileSystemHandle() does not return a file", async () => {
+  const file = createFile("test.json", {});
+  const handle = { kind: "unknown" } as unknown as FileSystemFileHandle;
+  const event = dragEvtFromItems([dataTransferItemWithFsHandle(file, handle)]);
+
+  await expect(fromEvent(event)).rejects.toThrow(
+    "Transferred item is not a file.",
+  );
 });
 
 function dragEvtFromItems(
@@ -589,19 +602,16 @@ function createFileSystemFileHandle<T>(
   return [
     file,
     {
+      kind: "file",
       getFile() {
         return Promise.resolve(file);
       },
-    },
+    } as FileSystemFileHandle,
   ];
 }
 
 function sortFiles<T extends File>(files: T[]) {
   return files.slice(0).sort((a, b) => a.name.localeCompare(b.name));
-}
-
-interface FileSystemFileHandle {
-  getFile(): Promise<File | null>;
 }
 
 type FileOrDirEntry = FileEntry | DirEntry;
