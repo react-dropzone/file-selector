@@ -107,15 +107,12 @@ input.addEventListener("change", async (event) => {
 Convert [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) items to File objects:
 
 ```js
-import { fromEvent } from "file-selector";
+import { fromFileHandles } from "file-selector";
 
 const handles = await window.showOpenFilePicker({ multiple: true });
-const files = await fromEvent(handles);
+const files = await fromFileHandles(handles);
 console.log(files);
 ```
-
-> [!NOTE]
-> The above is experimental and subject to change.
 
 ## Browser Support
 
