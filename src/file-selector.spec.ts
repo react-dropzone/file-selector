@@ -1,5 +1,5 @@
 import { FileWithPath } from "./file.js";
-import { fromEvent } from "./file-selector.js";
+import { fromEvent, fromFileHandles } from "./file-selector.js";
 
 it("returns a Promise", async () => {
   const evt = new Event("test");
@@ -46,27 +46,29 @@ it("should return an empty array if the evt {target} has no {files} prop", async
   expect(files).toHaveLength(0);
 });
 
-it("should return files if the arg is a list of FileSystemFileHandle", async () => {
-  const name = "test.json";
-  const [mockFile, mockHandle] = createFileSystemFileHandle(
-    name,
-    { ping: true },
-    {
-      type: "application/json",
-    },
-  );
+describe("fromFileHandles", () => {
+  it("retrieves files from file handles", async () => {
+    const name = "test.json";
+    const [mockFile, mockHandle] = createFileSystemFileHandle(
+      name,
+      { ping: true },
+      {
+        type: "application/json",
+      },
+    );
 
-  const files = await fromEvent([mockHandle]);
-  expect(files).toHaveLength(1);
-  expect(files.every((file) => file instanceof File)).toBe(true);
+    const files = await fromFileHandles([mockHandle]);
+    expect(files).toHaveLength(1);
+    expect(files.every((file) => file instanceof File)).toBe(true);
 
-  const [file] = files as FileWithPath[];
+    const [file] = files as FileWithPath[];
 
-  expect(file.name).toBe(mockFile.name);
-  expect(file.type).toBe(mockFile.type);
-  expect(file.size).toBe(mockFile.size);
-  expect(file.lastModified).toBe(mockFile.lastModified);
-  expect(file.path).toBe(`./${name}`);
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(`./${name}`);
+  });
 });
 
 it("should return an empty array if the passed event is not a DragEvent", async () => {

@@ -11,9 +11,6 @@ const FILES_TO_IGNORE = [
  * NOTE: If some of the items are folders,
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
  *
- * EXPERIMENTAL: A list of https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle objects can also be passed as an arg
- * and a list of File objects will be returned.
- *
  * @param evt
  */
 export async function fromEvent(
@@ -23,11 +20,6 @@ export async function fromEvent(
     return getDataTransferFiles(evt.dataTransfer, evt.type);
   } else if (isChangeEvt(evt)) {
     return getInputFiles(evt);
-  } else if (
-    Array.isArray(evt) &&
-    evt.every((item) => "getFile" in item && typeof item.getFile === "function")
-  ) {
-    return getFsHandleFiles(evt);
   }
   return [];
 }
@@ -52,10 +44,32 @@ function getInputFiles(event: Event): FileWithPath[] {
   return Array.from(event.target.files).map((file) => toFileWithPath(file));
 }
 
-// Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
-async function getFsHandleFiles(handles: any[]) {
-  const files = await Promise.all(handles.map((h) => h.getFile()));
-  return files.map((file) => toFileWithPath(file));
+/**
+ * Retrieves files from an array of `FileSystemHandle` objects from the File System API.
+ *
+ * @param handles The array of handles to convert.
+ * @returns A promise that resolves to an array of files retrieved from the handles.
+ *
+ * @example
+ * ```js
+ * const handles = await window.showOpenFilePicker({ multiple: true });
+ * const files = await fromFileHandles(handles);
+ * ```
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/File_System_API|MDN - File System API}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle|MDN - `FileSystemHandle`}
+ */
+export function fromFileHandles(
+  handles: FileSystemFileHandle[],
+): Promise<FileWithPath[]> {
+  return Promise.all(handles.map((handle) => fromFileHandle(handle)));
+}
+
+async function fromFileHandle(
+  handle: FileSystemFileHandle,
+): Promise<FileWithPath> {
+  const file = await handle.getFile();
+  return toFileWithPath(file);
 }
 
 async function getDataTransferFiles(dataTransfer: DataTransfer, type: string) {
