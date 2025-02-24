@@ -1,5 +1,42 @@
 import { FileWithPath } from "./file.js";
-import { fromEvent, fromFileHandles } from "./file-selector.js";
+import {
+  fromChangeEvent,
+  fromEvent,
+  fromFileHandles,
+} from "./file-selector.js";
+
+describe("fromChangeEvent", () => {
+  it("returns the files from the event", () => {
+    const name = "test.json";
+    const mockFile = createFile(
+      name,
+      { ping: true },
+      {
+        type: "application/json",
+      },
+    );
+    const evt = inputEvtFromFiles(mockFile);
+
+    const files = fromChangeEvent(evt);
+    expect(files).toHaveLength(1);
+    expect(files.every((file) => file instanceof File)).toBe(true);
+
+    const [file] = files as FileWithPath[];
+
+    expect(file.name).toBe(mockFile.name);
+    expect(file.type).toBe(mockFile.type);
+    expect(file.size).toBe(mockFile.size);
+    expect(file.lastModified).toBe(mockFile.lastModified);
+    expect(file.path).toBe(`./${name}`);
+  });
+
+  it("throws if the event is not associated with a file input", () => {
+    const event = new Event("change");
+    expect(() => fromChangeEvent(event)).toThrow(
+      "Event is not associated with a valid file input element.",
+    );
+  });
+});
 
 it("returns a Promise", async () => {
   const evt = new Event("test");
@@ -14,30 +51,6 @@ it("should return an empty array if the passed arg is not what we expect", async
 it("should return an empty array if drag event", async () => {
   const files = await fromEvent({});
   expect(files).toHaveLength(0);
-});
-
-it("should return the evt {target} {files} if the passed event is an input evt", async () => {
-  const name = "test.json";
-  const mockFile = createFile(
-    name,
-    { ping: true },
-    {
-      type: "application/json",
-    },
-  );
-  const evt = inputEvtFromFiles(mockFile);
-
-  const files = await fromEvent(evt);
-  expect(files).toHaveLength(1);
-  expect(files.every((file) => file instanceof File)).toBe(true);
-
-  const [file] = files as FileWithPath[];
-
-  expect(file.name).toBe(mockFile.name);
-  expect(file.type).toBe(mockFile.type);
-  expect(file.size).toBe(mockFile.size);
-  expect(file.lastModified).toBe(mockFile.lastModified);
-  expect(file.path).toBe(`./${name}`);
 });
 
 it("should return an empty array if the evt {target} has no {files} prop", async () => {

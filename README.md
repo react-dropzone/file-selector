@@ -95,11 +95,11 @@ document.addEventListener("drop", async (event) => {
 Convert a [change event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event) for an input type file to File objects:
 
 ```js
-import { fromEvent } from "file-selector";
+import { fromChangeEvent } from "file-selector";
 
 const input = document.getElementById("myInput");
-input.addEventListener("change", async (event) => {
-  const files = await fromEvent(event);
+input.addEventListener("change", (event) => {
+  const files = fromChangeEvent(event);
   console.log(files);
 });
 ```
