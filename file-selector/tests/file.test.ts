@@ -1,5 +1,5 @@
 // tslint:disable: forin
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {COMMON_MIME_TYPES, toFileWithPath} from '../src/file.ts';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {

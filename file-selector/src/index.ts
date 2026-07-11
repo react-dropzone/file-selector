@@ -1,3 +1,2 @@
-export function fn() {
-    return "Hello, tsdown!";
-}
+export {fromEvent} from './file-selector';
+export {FileWithPath} from './file';

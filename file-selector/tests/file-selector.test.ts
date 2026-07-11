@@ -1,5 +1,5 @@
-import {FileWithPath} from './file';
-import {fromEvent} from './file-selector';
+import {FileWithPath} from '../src/file.ts';
+import {fromEvent} from '../src/file-selector.ts';
 
 it('returns a Promise', async () => {
     const evt = new Event('test');
