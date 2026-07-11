@@ -1,4 +1,4 @@
-import { FileWithPath, toFileWithPath } from "./file";
+import { type FileWithPath, toFileWithPath } from "./file.ts";
 
 const FILES_TO_IGNORE = [
     // Thumbnail cache files for macOS and Windows

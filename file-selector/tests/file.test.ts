@@ -1,4 +1,5 @@
 // tslint:disable: forin
+import { describe, expect, it, test } from "vite-plus/test";
 import { COMMON_MIME_TYPES, toFileWithPath } from "../src/file.ts";
 
 describe("toFile()", () => {
@@ -141,25 +142,20 @@ describe("toFile()", () => {
         }
     });
 
-    it("should behave like a File", (done) => {
+    it("should behave like a File", async () => {
         const data = { ping: true };
         const json = JSON.stringify(data);
         const file = new File([json], "test.json");
         const fileWithPath = toFileWithPath(file);
 
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const { result } = evt.target as any;
-            try {
-                const d = JSON.parse(result);
-                expect(d).toEqual(data);
-                done();
-            } catch (e) {
-                done.fail(e as Error);
-            }
-        };
+        const result = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => resolve((evt.target as any).result);
+            reader.onerror = reject;
+            reader.readAsText(fileWithPath);
+        });
 
-        reader.readAsText(fileWithPath);
+        expect(JSON.parse(result)).toEqual(data);
     });
 
     it("sets the {handle} if provided", () => {

@@ -6,6 +6,10 @@ export default defineConfig({
             tsgo: true,
         },
         exports: true,
+        sourcemap: true,
+    },
+    test: {
+        environment: "jsdom",
     },
     lint: {
         options: {

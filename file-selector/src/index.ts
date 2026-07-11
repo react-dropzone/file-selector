@@ -1,2 +1,2 @@
-export { fromEvent } from "./file-selector";
-export { FileWithPath } from "./file";
+export { fromEvent } from "./file-selector.ts";
+export type { FileWithPath } from "./file.ts";

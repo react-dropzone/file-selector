@@ -1,4 +1,5 @@
-import { FileWithPath } from "../src/file.ts";
+import { expect, it } from "vite-plus/test";
+import type { FileWithPath } from "../src/file.ts";
 import { fromEvent } from "../src/file-selector.ts";
 
 it("returns a Promise", async () => {
@@ -274,7 +275,7 @@ it("filters thumbnail cache files", async () => {
     expect(items).toHaveLength(0);
 });
 
-it("should throw if reading dir entries fails", (done) => {
+it("should throw if reading dir entries fails", async () => {
     const mockFiles = sortFiles([
         createFile("ping.json", { ping: true }),
         createFile("pong.json", { pong: true }),
@@ -290,12 +291,10 @@ it("should throw if reading dir entries fails", (done) => {
         ),
     ]);
 
-    fromEvent(evt)
-        .then(() => done.fail("Getting the files should have failed"))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
-it("should throw if reading file entry fails", (done) => {
+it("should throw if reading file entry fails", async () => {
     const mockFiles = sortFiles([
         createFile("ping.json", { ping: true }),
         createFile("pong.json", { pong: true }),
@@ -311,18 +310,14 @@ it("should throw if reading file entry fails", (done) => {
         ),
     ]);
 
-    fromEvent(evt)
-        .then(() => done.fail("Getting the files should have failed"))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
-it("should throw if DataTransferItem is not a File", (done) => {
+it("should throw if DataTransferItem is not a File", async () => {
     const item = dataTransferItem(null, "file");
     const evt = dragEvtFromFilesAndItems([], [item]);
 
-    fromEvent(evt)
-        .then(() => done.fail("Getting the files should have failed"))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
 it("should use getAsFileSystemHandle when available", async () => {
