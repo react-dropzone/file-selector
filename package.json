@@ -47,8 +47,8 @@
   },
   "scripts": {
     "prebuild": "npm run clean",
-    "build": "rslib build",
-    "dev": "rslib build --watch",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
     "lint": "biome check .",
@@ -65,12 +65,12 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
     "@playwright/test": "^1.61.1",
-    "@rslib/core": "^0.23.2",
     "@size-limit/file": "^12.1.0",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
     "size-limit": "^12.1.0",
+    "tsdown": "^0.22.4",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
@@ -80,12 +80,18 @@
   "size-limit": [
     {
       "name": "core, esm (fromEvent + default MIME map)",
-      "path": ["dist/index.js", "dist/mime-default.js"],
+      "path": [
+        "dist/index.js",
+        "dist/mime-default.js"
+      ],
       "limit": "3 kB"
     },
     {
       "name": "core, cjs (fromEvent + default MIME map)",
-      "path": ["dist/index.cjs", "dist/mime-default.cjs"],
+      "path": [
+        "dist/index.cjs",
+        "dist/mime-default.cjs"
+      ],
       "limit": "4 kB"
     }
   ]
