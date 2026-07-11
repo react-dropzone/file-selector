@@ -1,4 +1,3 @@
-// tslint:disable: forin
 import {COMMON_MIME_TYPES, toFileWithPath} from './file';
 
 describe('toFile()', () => {
@@ -20,7 +19,7 @@ describe('toFile()', () => {
         const fullPath = '/Users/test/Desktop/test/test.json';
         const path = '/test/test.json';
         const file = new File([], 'test.json');
-        // @ts-ignore
+        // @ts-expect-error
         file.path = fullPath; // this is set only in the case of an electron app
         const fileWithPath = toFileWithPath(file, path);
         expect(fileWithPath.path).toBe(fullPath);
@@ -141,25 +140,21 @@ describe('toFile()', () => {
         }
     });
 
-    it('should behave like a File', done => {
+    it('should behave like a File', async () => {
         const data = {ping: true};
         const json = JSON.stringify(data);
         const file = new File([json], 'test.json');
         const fileWithPath = toFileWithPath(file);
 
-        const reader = new FileReader();
-        reader.onload = evt => {
-            const {result} = evt.target as any;
-            try {
-                const d = JSON.parse(result);
-                expect(d).toEqual(data);
-                done();
-            } catch (e) {
-                done.fail(e as Error);
-            }
-        };
+        const result = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = evt => resolve((evt.target as any).result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsText(fileWithPath);
+        });
 
-        reader.readAsText(fileWithPath);
+        const d = JSON.parse(result);
+        expect(d).toEqual(data);
     });
 
     it('sets the {handle} if provided', () => {
@@ -184,7 +179,6 @@ describe('toFile()', () => {
 
         expect(keys).toContain('handle');
     });
-
 });
 
 function fsHandleFromFile(f: File): FileSystemHandle {
@@ -192,7 +186,7 @@ function fsHandleFromFile(f: File): FileSystemHandle {
         kind: 'file',
         name: f.name,
         isSameEntry() {
-            return Promise.resolve(false)
+            return Promise.resolve(false);
         }
-    }
+    };
 }

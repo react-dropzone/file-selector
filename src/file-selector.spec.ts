@@ -1,4 +1,4 @@
-import {FileWithPath} from './file';
+import type {FileWithPath} from './file';
 import {fromEvent} from './file-selector';
 
 it('returns a Promise', async () => {
@@ -18,9 +18,13 @@ it('should return an empty array if drag event', async () => {
 
 it('should return the evt {target} {files} if the passed event is an input evt', async () => {
     const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
     const evt = inputEvtFromFiles(mockFile);
 
     const files = await fromEvent(evt);
@@ -44,9 +48,13 @@ it('should return an empty array if the evt {target} has no {files} prop', async
 
 it('should return files if the arg is a list of FileSystemFileHandle', async () => {
     const name = 'test.json';
-    const [mockFile, mockHandle] = createFileSystemFileHandle(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const [mockFile, mockHandle] = createFileSystemFileHandle(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
 
     const files = await fromEvent([mockHandle]);
     expect(files).toHaveLength(1);
@@ -69,9 +77,13 @@ it('should return an empty array if the passed event is not a DragEvent', async 
 
 it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11)', async () => {
     const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
     const evt = dragEvt([mockFile]);
 
     const files = await fromEvent(evt);
@@ -89,9 +101,13 @@ it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11
 
 it('should return files from DataTransfer {items} if the passed event is a DragEvent', async () => {
     const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
     const item = dataTransferItemFromFile(mockFile);
     const evt = dragEvtFromFilesAndItems([], [item]);
 
@@ -110,13 +126,17 @@ it('should return files from DataTransfer {items} if the passed event is a DragE
 
 it('should use the {fullPath} for {path} if {webkitGetAsEntry} is supported and the items are FileSystemFileEntry', async () => {
     const name = 'test.json';
-    const fullPath = '/testfolder/test.json'
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const fullPath = '/testfolder/test.json';
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
 
     const file = fileSystemFileEntryFromFile(mockFile);
-    file.fullPath = fullPath
+    file.fullPath = fullPath;
     const item = dataTransferItemFromEntry(file, mockFile);
     const evt = dragEvtFromFilesAndItems([], [item]);
 
@@ -135,9 +155,13 @@ it('should use the {fullPath} for {path} if {webkitGetAsEntry} is supported and 
 
 it('skips DataTransfer {items} that are of kind "string"', async () => {
     const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
     const f = dataTransferItemFromFile(mockFile);
     const str = dataTransferItemFromStr('test');
     const evt = dragEvtFromItems([str, f]);
@@ -164,20 +188,20 @@ it('can read a tree of directories recursively and return a flat list of FileWit
         createFile('jane.json', {jane: true})
     ]);
     const [f1, f2, f3, f4, f5, f6] = mockFiles;
-    const [f7, f8] = [
-        createFile('.DS_Store', {macOs: true}),
-        createFile('Thumbs.db', {windows: true})
-    ];
+    const [f7, f8] = [createFile('.DS_Store', {macOs: true}), createFile('Thumbs.db', {windows: true})];
     const evt = dragEvtFromItems([
         dataTransferItemFromEntry(fileSystemFileEntryFromFile(f1), f1),
         dataTransferItemFromEntry(fileSystemFileEntryFromFile(f2), f2),
-        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
-            fileSystemFileEntryFromFile(f3),
-            fileSystemDirEntryFromFile([
-                fileSystemFileEntryFromFile(f4)
-            ]),
-            fileSystemFileEntryFromFile(f5)
-        ], 2)),
+        dataTransferItemFromEntry(
+            fileSystemDirEntryFromFile(
+                [
+                    fileSystemFileEntryFromFile(f3),
+                    fileSystemDirEntryFromFile([fileSystemFileEntryFromFile(f4)]),
+                    fileSystemFileEntryFromFile(f5)
+                ],
+                2
+            )
+        ),
         dataTransferItemFromEntry(fileSystemFileEntryFromFile(f6), f6),
         dataTransferItemFromEntry(fileSystemFileEntryFromFile(f7), f7),
         dataTransferItemFromEntry(fileSystemFileEntryFromFile(f8), f8)
@@ -193,9 +217,13 @@ it('can read a tree of directories recursively and return a flat list of FileWit
 
 it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', async () => {
     const name = 'test.json';
-    const mockFile = createFile(name, {ping: true}, {
-        type: 'application/json'
-    });
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
     const item = dataTransferItemFromFile(mockFile);
     const evt = dragEvtFromItems(item, 'dragenter');
 
@@ -208,89 +236,86 @@ it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', asy
     expect(itm.kind).toBe('file');
 });
 
-it(
-    'filters DataTransfer {items} if the DragEvent {type} is not "drop" and DataTransferItem {kind} is "string"',
-    async () => {
-        const name = 'test.json';
-        const mockFile = createFile(name, {ping: true}, {
+it('filters DataTransfer {items} if the DragEvent {type} is not "drop" and DataTransferItem {kind} is "string"', async () => {
+    const name = 'test.json';
+    const mockFile = createFile(
+        name,
+        {ping: true},
+        {
             type: 'application/json'
-        });
-        const file = dataTransferItemFromFile(mockFile);
-        const str = dataTransferItemFromStr('test');
-        const evt = dragEvtFromItems([file, str], 'dragenter');
+        }
+    );
+    const file = dataTransferItemFromFile(mockFile);
+    const str = dataTransferItemFromStr('test');
+    const evt = dragEvtFromItems([file, str], 'dragenter');
 
-        const items = await fromEvent(evt);
-        expect(items).toHaveLength(1);
+    const items = await fromEvent(evt);
+    expect(items).toHaveLength(1);
 
-        const [item] = items as DataTransferItem[];
+    const [item] = items as DataTransferItem[];
 
-        expect(item.kind).toBe(file.kind);
-        expect(item.kind).toBe('file');
-    }
-);
+    expect(item.kind).toBe(file.kind);
+    expect(item.kind).toBe('file');
+});
 
 it('filters thumbnail cache files', async () => {
-    const mockFile = createFile('Thumbs.db', {ping: true}, {
-        type: 'text/plain'
-    });
+    const mockFile = createFile(
+        'Thumbs.db',
+        {ping: true},
+        {
+            type: 'text/plain'
+        }
+    );
     const evt = dragEvt([mockFile]);
     const items = await fromEvent(evt);
     expect(items).toHaveLength(0);
 });
 
-it('should throw if reading dir entries fails', done => {
-    const mockFiles = sortFiles([
-        createFile('ping.json', {ping: true}),
-        createFile('pong.json', {pong: true})
-    ]);
+it('should throw if reading dir entries fails', async () => {
+    const mockFiles = sortFiles([createFile('ping.json', {ping: true}), createFile('pong.json', {pong: true})]);
     const [f1, f2] = mockFiles;
     const evt = dragEvtFromItems([
-        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
-            fileSystemFileEntryFromFile(f1),
-            fileSystemFileEntryFromFile(f2)
-        ], 1, 1))
+        dataTransferItemFromEntry(
+            fileSystemDirEntryFromFile([fileSystemFileEntryFromFile(f1), fileSystemFileEntryFromFile(f2)], 1, 1)
+        )
     ]);
 
-    fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
-it('should throw if reading file entry fails', done => {
-    const mockFiles = sortFiles([
-        createFile('ping.json', {ping: true}),
-        createFile('pong.json', {pong: true})
-    ]);
+it('should throw if reading file entry fails', async () => {
+    const mockFiles = sortFiles([createFile('ping.json', {ping: true}), createFile('pong.json', {pong: true})]);
     const [f1, f2] = mockFiles;
     const evt = dragEvtFromItems([
-        dataTransferItemFromEntry(fileSystemDirEntryFromFile([
-            fileSystemFileEntryFromFile(f1),
-            fileSystemFileEntryFromFile(f2, 'Oops :(')
-        ], 1, 1))
+        dataTransferItemFromEntry(
+            fileSystemDirEntryFromFile(
+                [fileSystemFileEntryFromFile(f1), fileSystemFileEntryFromFile(f2, 'Oops :(')],
+                1,
+                1
+            )
+        )
     ]);
 
-    fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
-it('should throw if DataTransferItem is not a File', done => {
+it('should throw if DataTransferItem is not a File', async () => {
     const item = dataTransferItem(null, 'file');
     const evt = dragEvtFromFilesAndItems([], [item]);
 
-    fromEvent(evt)
-        .then(() => done.fail('Getting the files should have failed'))
-        .catch(() => done());
+    await expect(fromEvent(evt)).rejects.toThrow();
 });
 
 it('should use getAsFileSystemHandle when available', async () => {
     const name = 'test.json';
-    const [f, h] = createFileSystemFileHandle(name, {ping: true}, {
-        type: 'application/json'
-    });
-    const evt = dragEvtFromItems([
-        dataTransferItemWithFsHandle(f, h)
-    ]);
+    const [f, h] = createFileSystemFileHandle(
+        name,
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
+    const evt = dragEvtFromItems([dataTransferItemWithFsHandle(f, h)]);
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
     expect(files.every(file => file instanceof File)).toBe(true);
@@ -306,15 +331,21 @@ it('should use getAsFileSystemHandle when available', async () => {
 
 it('should not use getAsFileSystemHandle when not in a secure context', async () => {
     const f1Name = 'test.nosec.json';
-    const f1 = createFile(f1Name, {ping: false}, {
-        type: 'application/json'
-    });
-    const [_, h] = createFileSystemFileHandle('test.sec.json', {ping: true}, {
-        type: 'application/json'
-    });
-    const evt = dragEvtFromItems([
-        dataTransferItemWithFsHandle(f1, h)
-    ]);
+    const f1 = createFile(
+        f1Name,
+        {ping: false},
+        {
+            type: 'application/json'
+        }
+    );
+    const [_, h] = createFileSystemFileHandle(
+        'test.sec.json',
+        {ping: true},
+        {
+            type: 'application/json'
+        }
+    );
+    const evt = dragEvtFromItems([dataTransferItemWithFsHandle(f1, h)]);
 
     window.isSecureContext = false;
 
@@ -334,20 +365,20 @@ it('should not use getAsFileSystemHandle when not in a secure context', async ()
 });
 
 it('should reject when getAsFileSystemHandle resolves to null', async () => {
-    const evt = dragEvtFromItems([
-        dataTransferItemWithFsHandle(null, null)
-    ]);
+    const evt = dragEvtFromItems([dataTransferItemWithFsHandle(null, null)]);
     expect(fromEvent(evt)).rejects.toThrow('[object Object] is not a File');
 });
 
 it('should fallback to getAsFile when getAsFileSystemHandle resolves to undefined', async () => {
     const name = 'test.nosec.json';
-    const mockFile = createFile(name, {ping: false}, {
-        type: 'application/json'
-    });
-    const evt = dragEvtFromItems([
-        dataTransferItemWithFsHandle(mockFile, undefined)
-    ]);
+    const mockFile = createFile(
+        name,
+        {ping: false},
+        {
+            type: 'application/json'
+        }
+    );
+    const evt = dragEvtFromItems([dataTransferItemWithFsHandle(mockFile, undefined)]);
 
     const files = await fromEvent(evt);
     expect(files).toHaveLength(1);
@@ -392,7 +423,6 @@ function dataTransferItemFromFile(file: File): DataTransferItem {
         getAsFile() {
             return file;
         },
-        // tslint:disable-next-line: no-empty
         getAsString() {}
     } as any;
 }
@@ -458,11 +488,7 @@ function fileSystemFileEntryFromFile(file: File, err?: any): FileEntry {
     };
 }
 
-function fileSystemDirEntryFromFile(
-    files: FileOrDirEntry[],
-    batchSize: number = 1,
-    throwAfter: number = 0
-): DirEntry {
+function fileSystemDirEntryFromFile(files: FileOrDirEntry[], batchSize: number = 1, throwAfter: number = 0): DirEntry {
     const copy = files.slice(0);
     const batches: FileOrDirEntry[][] = [];
 
@@ -508,7 +534,7 @@ function inputEvtFromFiles(...files: File[]): Event {
         });
     }
     return new Proxy(new CustomEvent('input'), {
-        get(t, p, rcvr) {
+        get(t, p, _rcvr) {
             if (p === 'target') {
                 return input;
             }
@@ -525,30 +551,28 @@ function createFile<T>(name: string, data: T, options?: FilePropertyBag) {
 
 function createFileSystemFileHandle<T>(name: string, data: T, options?: FilePropertyBag): [File, FileSystemFileHandle] {
     const file = createFile(name, data, options);
-    return [file, {
-        getFile() {
-            return Promise.resolve(file);
+    return [
+        file,
+        {
+            getFile() {
+                return Promise.resolve(file);
+            }
         }
-    }];
+    ];
 }
 
 function sortFiles<T extends File>(files: T[]) {
-    return files.slice(0)
-        .sort((a, b) => a.name.localeCompare(b.name));
+    return files.slice(0).sort((a, b) => a.name.localeCompare(b.name));
 }
-
 
 interface FileSystemFileHandle {
     getFile(): Promise<File | null>;
 }
 
-type FileOrDirEntry = FileEntry | DirEntry
+type FileOrDirEntry = FileEntry | DirEntry;
 
 interface FileEntry extends Entry {
-    file(
-        cb: (file: File) => void,
-        errCb: (err: any) => void
-    ): void;
+    file(cb: (file: File) => void, errCb: (err: any) => void): void;
 }
 
 interface DirEntry extends Entry {
@@ -562,8 +586,5 @@ interface Entry {
 }
 
 interface DirReader {
-    readEntries(
-        cb: (entries: FileOrDirEntry[]) => void,
-        errCb: (err: any) => void
-    ): void;
+    readEntries(cb: (entries: FileOrDirEntry[]) => void, errCb: (err: any) => void): void;
 }
