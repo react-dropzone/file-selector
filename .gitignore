@@ -35,6 +35,6 @@ out-tsc
 tmp
 
 
-## Vitest browser mode (test-run artifacts)
-__screenshots__
-.vitest-attachments
+## Playwright
+test-results
+playwright-report

@@ -50,19 +50,18 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "pretest:cov": "npm run type-check && npm run lint",
-    "test": "vitest --project unit",
-    "test:cov": "vitest run --project unit --coverage",
-    "test:e2e": "vitest run --project browser"
+    "test": "vitest",
+    "test:cov": "vitest run --coverage",
+    "pretest:e2e": "npm run build",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
+    "@playwright/test": "^1.61.1",
     "@rslib/core": "^0.23.2",
     "@types/node": "^26.1.1",
-    "@vitest/browser": "^4.1.10",
-    "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
-    "playwright": "^1.61.1",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
