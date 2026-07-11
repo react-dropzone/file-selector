@@ -6,7 +6,10 @@
     },
     "rules": {
         "typescript/no-explicit-any": "off",
-        "typescript/no-non-null-assertion": "off"
+        "typescript/no-non-null-assertion": "off",
+        "typescript/no-floating-promises": "error",
+        "typescript/no-redundant-type-constituents": "off",
+        "typescript/require-array-sort-compare": "off"
     },
     "ignorePatterns": ["dist", "coverage", "test-results"]
 }
