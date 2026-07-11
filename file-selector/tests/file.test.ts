@@ -1,4 +1,3 @@
-// tslint:disable: forin
 import { describe, expect, it, test } from "vite-plus/test";
 import { COMMON_MIME_TYPES, toFileWithPath } from "../src/file.ts";
 

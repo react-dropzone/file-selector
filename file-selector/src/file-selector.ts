@@ -16,7 +16,8 @@ const FILES_TO_IGNORE = [
  *
  * @param evt
  */
-export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
+// TODO: Replace `any` with a proper union type (Event | FileSystemFileHandle[]).
+export async function fromEvent(evt: any): Promise<(FileWithPath | DataTransferItem)[]> {
     if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
         return getDataTransferFiles(evt.dataTransfer, evt.type);
     } else if (isChangeEvt(evt)) {
@@ -86,7 +87,6 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
 
     const files = [];
 
-    // tslint:disable: prefer-for-of
     for (let i = 0; i < items.length; i++) {
         const file = items[i];
         files.push(file);
@@ -130,7 +130,8 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === "function") {
         const h = await (item as any).getAsFileSystemHandle();
         if (h === null) {
-            throw new Error(`${item} is not a File`);
+            // TODO: Produce a more useful error message than "[object Object]".
+            throw new Error(`${item as unknown as string} is not a File`);
         }
         // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
         // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
@@ -142,7 +143,8 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     }
     const file = item.getAsFile();
     if (!file) {
-        throw new Error(`${item} is not a File`);
+        // TODO: Produce a more useful error message than "[object Object]".
+        throw new Error(`${item as unknown as string} is not a File`);
     }
     const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
     return fwp;

@@ -380,7 +380,7 @@ it("should not use getAsFileSystemHandle when not in a secure context", async ()
 
 it("should reject when getAsFileSystemHandle resolves to null", async () => {
     const evt = dragEvtFromItems([dataTransferItemWithFsHandle(null, null)]);
-    expect(fromEvent(evt)).rejects.toThrow("[object Object] is not a File");
+    await expect(fromEvent(evt)).rejects.toThrow("[object Object] is not a File");
 });
 
 it("should fallback to getAsFile when getAsFileSystemHandle resolves to undefined", async () => {
@@ -444,7 +444,6 @@ function dataTransferItemFromFile(file: File): DataTransferItem {
         getAsFile() {
             return file;
         },
-        // tslint:disable-next-line: no-empty
         getAsString() {},
     } as any;
 }
@@ -563,7 +562,7 @@ function inputEvtFromFiles(...files: File[]): Event {
         });
     }
     return new Proxy(new CustomEvent("input"), {
-        get(t, p, rcvr) {
+        get(t, p) {
             if (p === "target") {
                 return input;
             }
