@@ -5,10 +5,16 @@ updates:
     directory: /
     rebase-strategy: auto
     schedule:
-      interval: "weekly"
-    allow:
-      - dependency-name: "*"
-        dependency-type: "production"
+      interval: weekly
     commit-message:
-      prefix: "feat(deps):"
+      prefix: "chore"
+      include: "scope"
     versioning-strategy: widen
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore"
+      include: "scope"

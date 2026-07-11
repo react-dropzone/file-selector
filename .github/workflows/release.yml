@@ -20,23 +20,20 @@ jobs:
       id-token: write # to enable use of OIDC for npm provenance
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # fetch all history
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: 22
+          cache: true
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run build
-        run: npm run build
+      - name: Build
+        run: vp pack
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release@^24
+        run: npx semantic-release@^25

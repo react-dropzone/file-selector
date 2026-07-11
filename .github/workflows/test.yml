@@ -15,26 +15,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14, 16, 18, 20, 22]
+        node-version: [22, 24]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1
         with:
           node-version: ${{ matrix.node-version }}
+          cache: true
 
-      - name: Install compatible NPM version
-        if: matrix.node-version == 14
-        run: npm install -g npm@^9
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Check formatting, linting, and types
+        run: vp check
 
       - name: Run tests
-        run: npm run test:cov
+        run: vp test --coverage
 
       - name: Collect coverage
         uses: coverallsapp/github-action@v2
