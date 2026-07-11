@@ -1,12 +1,10 @@
-import {FileWithPath, toFileWithPath} from './file';
-
+import { FileWithPath, toFileWithPath } from "./file";
 
 const FILES_TO_IGNORE = [
     // Thumbnail cache files for macOS and Windows
-    '.DS_Store', // macOs
-    'Thumbs.db'  // Windows
+    ".DS_Store", // macOs
+    "Thumbs.db", // Windows
 ];
-
 
 /**
  * Convert a DragEvent's DataTrasfer object to a list of File objects
@@ -23,8 +21,11 @@ export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataT
         return getDataTransferFiles(evt.dataTransfer, evt.type);
     } else if (isChangeEvt(evt)) {
         return getInputFiles(evt);
-    } else if (Array.isArray(evt) && evt.every(item => 'getFile' in item && typeof item.getFile === 'function')) {
-        return getFsHandleFiles(evt)
+    } else if (
+        Array.isArray(evt) &&
+        evt.every((item) => "getFile" in item && typeof item.getFile === "function")
+    ) {
+        return getFsHandleFiles(evt);
     }
     return [];
 }
@@ -38,41 +39,40 @@ function isChangeEvt(value: any): value is Event {
 }
 
 function isObject<T>(v: any): v is T {
-    return typeof v === 'object' && v !== null
+    return typeof v === "object" && v !== null;
 }
 
 function getInputFiles(evt: Event) {
-    return fromList<FileWithPath>((evt.target as HTMLInputElement).files).map(file => toFileWithPath(file));
+    return fromList<FileWithPath>((evt.target as HTMLInputElement).files).map((file) =>
+        toFileWithPath(file),
+    );
 }
 
 // Ee expect each handle to be https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
 async function getFsHandleFiles(handles: any[]) {
-    const files = await Promise.all(handles.map(h => h.getFile()));
-    return files.map(file => toFileWithPath(file));
+    const files = await Promise.all(handles.map((h) => h.getFile()));
+    return files.map((file) => toFileWithPath(file));
 }
-
 
 async function getDataTransferFiles(dt: DataTransfer, type: string) {
     // IE11 does not support dataTransfer.items
     // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items#Browser_compatibility
     if (dt.items) {
-        const items = fromList<DataTransferItem>(dt.items)
-            .filter(item => item.kind === 'file');
+        const items = fromList<DataTransferItem>(dt.items).filter((item) => item.kind === "file");
         // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
         // only 'dragstart' and 'drop' has access to the data (source node)
-        if (type !== 'drop') {
+        if (type !== "drop") {
             return items;
         }
         const files = await Promise.all(items.map(toFilePromises));
         return noIgnoredFiles(flatten<FileWithPath>(files));
     }
 
-    return noIgnoredFiles(fromList<FileWithPath>(dt.files)
-        .map(file => toFileWithPath(file)));
+    return noIgnoredFiles(fromList<FileWithPath>(dt.files).map((file) => toFileWithPath(file)));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {
-    return files.filter(file => FILES_TO_IGNORE.indexOf(file.name) === -1);
+    return files.filter((file) => FILES_TO_IGNORE.indexOf(file.name) === -1);
 }
 
 // IE11 does not support Array.from()
@@ -97,7 +97,7 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
 
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
 function toFilePromises(item: DataTransferItem) {
-    if (typeof item.webkitGetAsEntry !== 'function') {
+    if (typeof item.webkitGetAsEntry !== "function") {
         return fromDataTransferItem(item);
     }
 
@@ -114,10 +114,10 @@ function toFilePromises(item: DataTransferItem) {
 }
 
 function flatten<T>(items: any[]): T[] {
-    return items.reduce((acc, files) => [
-        ...acc,
-        ...(Array.isArray(files) ? flatten(files) : [files])
-    ], []);
+    return items.reduce(
+        (acc, files) => [...acc, ...(Array.isArray(files) ? flatten(files) : [files])],
+        [],
+    );
 }
 
 async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
@@ -127,7 +127,7 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     // See:
     // - https://issues.chromium.org/issues/40186242
     // - https://github.com/react-dropzone/react-dropzone/issues/1397
-    if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
+    if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === "function") {
         const h = await (item as any).getAsFileSystemHandle();
         if (h === null) {
             throw new Error(`${item} is not a File`);
@@ -163,25 +163,28 @@ function fromDirEntry(entry: any) {
         function readEntries() {
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryReader/readEntries
-            reader.readEntries(async (batch: any[]) => {
-                if (!batch.length) {
-                    // Done reading directory
-                    try {
-                        const files = await Promise.all(entries);
-                        resolve(files);
-                    } catch (err) {
-                        reject(err);
-                    }
-                } else {
-                    const items = Promise.all(batch.map(fromEntry));
-                    entries.push(items);
+            reader.readEntries(
+                async (batch: any[]) => {
+                    if (!batch.length) {
+                        // Done reading directory
+                        try {
+                            const files = await Promise.all(entries);
+                            resolve(files);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    } else {
+                        const items = Promise.all(batch.map(fromEntry));
+                        entries.push(items);
 
-                    // Continue reading
-                    readEntries();
-                }
-            }, (err: any) => {
-                reject(err);
-            });
+                        // Continue reading
+                        readEntries();
+                    }
+                },
+                (err: any) => {
+                    reject(err);
+                },
+            );
         }
 
         readEntries();
@@ -191,17 +194,19 @@ function fromDirEntry(entry: any) {
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
 async function fromFileEntry(entry: any) {
     return new Promise<FileWithPath>((resolve, reject) => {
-        entry.file((file: FileWithPath) => {
-            const fwp = toFileWithPath(file, entry.fullPath);
-            resolve(fwp);
-        }, (err: any) => {
-            reject(err);
-        });
+        entry.file(
+            (file: FileWithPath) => {
+                const fwp = toFileWithPath(file, entry.fullPath);
+                resolve(fwp);
+            },
+            (err: any) => {
+                reject(err);
+            },
+        );
     });
 }
 
 // Infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
 interface FileArray extends Array<FileValue> {}
-type FileValue = FileWithPath
-    | FileArray[];
+type FileValue = FileWithPath | FileArray[];
