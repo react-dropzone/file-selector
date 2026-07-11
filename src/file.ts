@@ -1202,8 +1202,8 @@ export const COMMON_MIME_TYPES: Map<string, string> = new Map([
     ['zsh', 'text/x-scriptzsh']
 ]);
 
-export function toFileWithPath(file: FileWithPath, path?: string, h?: FileSystemHandle): FileWithPath {
-    const f = withMimeType(file);
+export function toFileWithPath(file: File, path?: string, h?: FileSystemHandle): FileWithPath {
+    const f = withMimeType(file) as FileWithPath;
     const {webkitRelativePath} = file;
     const p =
         typeof path === 'string'
@@ -1232,12 +1232,12 @@ export function toFileWithPath(file: FileWithPath, path?: string, h?: FileSystem
 }
 
 export interface FileWithPath extends File {
-    readonly path?: string;
+    readonly path: string;
+    readonly relativePath: string;
     readonly handle?: FileSystemFileHandle;
-    readonly relativePath?: string;
 }
 
-function withMimeType(file: FileWithPath) {
+function withMimeType(file: File) {
     const {name} = file;
     const hasExtension = name && name.lastIndexOf('.') !== -1;
 
