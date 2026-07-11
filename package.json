@@ -49,13 +49,16 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "lint:type-aware": "oxlint --type-aware",
-    "format": "oxfmt \"src/**/*.ts\" \"*.ts\"",
-    "format:check": "oxfmt --check \"src/**/*.ts\" \"*.ts\"",
+    "format": "oxfmt \"src/**/*.ts\" \"e2e/**/*.ts\" \"*.ts\"",
+    "format:check": "oxfmt --check \"src/**/*.ts\" \"e2e/**/*.ts\" \"*.ts\"",
     "pretest:cov": "npm run type-check && npm run lint && npm run format:check",
     "test": "vitest",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "pretest:e2e": "npm run build",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
