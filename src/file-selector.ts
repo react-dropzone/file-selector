@@ -91,7 +91,7 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem
-function toFilePromises(item: DataTransferItem) {
+async function toFilePromises(item: DataTransferItem) {
     if (typeof item.webkitGetAsEntry !== 'function') {
         return fromDataTransferItem(item);
     }
@@ -102,6 +102,15 @@ function toFilePromises(item: DataTransferItem) {
     // the DataTransferItem.getAsFile() API
     // NOTE: FileSystemEntry.file() throws if trying to get the file
     if (entry?.isDirectory) {
+        // Prefer the File System Access API for directory traversal where it's available.
+        // The legacy Entry API (FileSystemDirectoryReader.readEntries) throws on some platforms,
+        // e.g. dragging a folder from Windows Explorer into a Chromium browser, which would
+        // otherwise reject the entire drop and lose every file.
+        // See https://github.com/react-dropzone/file-selector/issues/130
+        const handle = await getFsHandle(item);
+        if (handle?.kind === 'directory') {
+            return fromDirHandle(handle, `/${handle.name}`);
+        }
         return fromDirEntry(entry) as any;
     }
 
@@ -121,24 +130,18 @@ function flatten<T>(items: any[]): T[] {
 }
 
 async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
-    // Check if we're in a secure context; due to a bug in Chrome (as far as we know)
-    // the browser crashes when calling this API (yet to be confirmed as a consistent behaviour).
-    //
-    // See:
-    // - https://issues.chromium.org/issues/40186242
-    // - https://github.com/react-dropzone/react-dropzone/issues/1397
-    if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
-        const h = await (item as any).getAsFileSystemHandle();
-        if (h === null) {
-            throw new UnexpectedObjectError(item);
-        }
-        // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
-        // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
-        if (h !== undefined) {
-            const file = await h.getFile();
-            file.handle = h;
-            return toFileWithPath(file);
-        }
+    const h = await getFsHandle(item);
+    if (h === null) {
+        throw new UnexpectedObjectError(item);
+    }
+    // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
+    // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
+    // The handle is also `undefined` when the File System Access API isn't available or we're not
+    // in a secure context, in which case we likewise fall back to `getAsFile`.
+    if (h !== undefined) {
+        const file = await h.getFile();
+        file.handle = h;
+        return toFileWithPath(file);
     }
     const file = item.getAsFile();
     if (!file) {
@@ -146,6 +149,37 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
     }
     const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
     return fwp;
+}
+
+// Resolve the https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle for a dropped item.
+// Returns `undefined` when the File System Access API isn't available or we're not in a secure context.
+//
+// We check for a secure context because, due to a bug in Chrome (as far as we know),
+// the browser crashes when calling this API (yet to be confirmed as a consistent behaviour).
+// See:
+// - https://issues.chromium.org/issues/40186242
+// - https://github.com/react-dropzone/react-dropzone/issues/1397
+async function getFsHandle(item: DataTransferItem) {
+    if (globalThis.isSecureContext && typeof (item as any).getAsFileSystemHandle === 'function') {
+        return (item as any).getAsFileSystemHandle();
+    }
+    return undefined;
+}
+
+// Traverse a directory recursively using the File System Access API, returning a flat list of files.
+// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
+async function fromDirHandle(handle: any, path: string): Promise<FileWithPath[]> {
+    const files: FileWithPath[] = [];
+    for await (const child of handle.values()) {
+        const childPath = `${path}/${child.name}`;
+        if (child.kind === 'directory') {
+            files.push(...(await fromDirHandle(child, childPath)));
+        } else {
+            const file = await child.getFile();
+            files.push(toFileWithPath(file, childPath, child));
+        }
+    }
+    return files;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
