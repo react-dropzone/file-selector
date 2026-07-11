@@ -54,6 +54,13 @@ describe('toFile()', () => {
         expect(fileWithPath.path).toBe(`./${name}`);
     });
 
+    it('always sets {path} and {relativePath} to a string, even for a bare File', () => {
+        const file = new File([], 'test.json');
+        const fileWithPath = toFileWithPath(file);
+        expect(typeof fileWithPath.path).toBe('string');
+        expect(typeof fileWithPath.relativePath).toBe('string');
+    });
+
     it('uses the File {webkitRelativePath} as {path} if it exists', () => {
         const name = 'test.json';
         const path = 'test/test.json';
