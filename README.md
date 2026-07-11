@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/file-selector.svg?style=flat-square)](https://www.npmjs.com/package/file-selector)
 ![Tests](https://img.shields.io/github/actions/workflow/status/react-dropzone/file-selector/test.yml?branch=main&style=flat-square&label=tests)
-[![codecov](https://img.shields.io/coveralls/github/react-dropzone/file-selector/main?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=main)
+[![coverage](https://img.shields.io/coveralls/github/react-dropzone/file-selector/main?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=main)
 [![Open Collective Backers](https://img.shields.io/opencollective/backers/react-dropzone.svg?style=flat-square)](#backers)
 [![Open Collective Sponsors](https://img.shields.io/opencollective/sponsors/react-dropzone.svg?style=flat-square)](#sponsors)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat-square)](https://github.com/react-dropzone/.github/blob/main/CODE_OF_CONDUCT.md)
