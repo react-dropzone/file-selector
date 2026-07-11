@@ -427,6 +427,38 @@ it('should fallback to getAsFile when getAsFileSystemHandle resolves to undefine
     expect(file.path).toBe(`./${name}`);
 });
 
+it('guesses the {type} from the extension using the built-in defaults', async () => {
+    const mockFile = createFile('test.png', {ping: true}); // typeless File
+    const evt = inputEvtFromFiles(mockFile);
+
+    const [file] = (await fromEvent(evt)) as FileWithPath[];
+    expect(file.type).toBe('image/png');
+});
+
+it('does not guess the {type} for extensions outside the built-in defaults', async () => {
+    const mockFile = createFile('test.3mf', {ping: true}); // uncommon, not in DEFAULT_MIME_TYPES
+    const evt = inputEvtFromFiles(mockFile);
+
+    const [file] = (await fromEvent(evt)) as FileWithPath[];
+    expect(file.type).toBe('');
+});
+
+it('guesses the {type} from a custom {mimeTypes} lookup when provided', async () => {
+    const mockFile = createFile('test.3mf', {ping: true}); // typeless File
+    const evt = inputEvtFromFiles(mockFile);
+
+    const [file] = (await fromEvent(evt, {mimeTypes: new Map([['3mf', 'model/3mf']])})) as FileWithPath[];
+    expect(file.type).toBe('model/3mf');
+});
+
+it('does not overwrite a {type} already set by the browser', async () => {
+    const mockFile = createFile('test.png', {ping: true}, {type: 'application/octet-stream'});
+    const evt = inputEvtFromFiles(mockFile);
+
+    const [file] = (await fromEvent(evt)) as FileWithPath[];
+    expect(file.type).toBe('application/octet-stream');
+});
+
 function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: string = 'drop'): DragEvent {
     return {
         type,

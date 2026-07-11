@@ -12,6 +12,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./mime": {
+      "types": "./dist/mime.d.ts",
+      "import": "./dist/mime.js",
+      "require": "./dist/mime.cjs"
+    },
     "./package.json": "./package.json"
   },
   "sideEffects": false,
@@ -53,19 +58,35 @@
     "test": "vitest",
     "test:cov": "vitest run --coverage",
     "pretest:e2e": "npm run build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "presize": "npm run build",
+    "size": "size-limit"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
     "@playwright/test": "^1.61.1",
     "@rslib/core": "^0.23.2",
+    "@size-limit/file": "^12.1.0",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
+    "size-limit": "^12.1.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">= 20"
-  }
+  },
+  "size-limit": [
+    {
+      "name": "core, esm (fromEvent + default MIME map)",
+      "path": ["dist/index.js", "dist/mime-default.js"],
+      "limit": "3 kB"
+    },
+    {
+      "name": "core, cjs (fromEvent + default MIME map)",
+      "path": ["dist/index.cjs", "dist/mime-default.cjs"],
+      "limit": "4 kB"
+    }
+  ]
 }

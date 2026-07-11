@@ -84,6 +84,22 @@ document.addEventListener('drop', async evt => {
 });
 ```
 
+### MIME types
+When the browser doesn't set a File's `type`, `fromEvent` infers one from the file extension. By default it uses a small built-in table of the most common types, keeping the bundle lean.
+
+If you need broader coverage, import the full extension-to-MIME table from the `file-selector/mime` subpath and pass it via the `mimeTypes` option. Because it's a separate entry point, the full table (~1,200 entries) is only included in your bundle when you import it:
+```ts
+import {fromEvent} from 'file-selector';
+import {COMMON_MIME_TYPES} from 'file-selector/mime';
+
+const files = await fromEvent(evt, {mimeTypes: COMMON_MIME_TYPES});
+```
+
+You can also pass your own `Map<extension, mimeType>` to restrict or extend the lookup:
+```ts
+const files = await fromEvent(evt, {mimeTypes: new Map([['dwg', 'image/vnd.dwg']])});
+```
+
 
 ## Browser Support
 Most browser support basic File selection with drag 'n' drop or file input:
