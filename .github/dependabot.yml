@@ -8,7 +8,7 @@ updates:
       interval: "weekly"
     allow:
       - dependency-name: "*"
-        dependency-type: "production"
+        dependency-type: "all"
     commit-message:
-      prefix: "feat(deps):"
-    versioning-strategy: widen
+      prefix: "chore(deps):"
+    versioning-strategy: increase
