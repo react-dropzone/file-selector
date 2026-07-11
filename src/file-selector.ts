@@ -1,11 +1,31 @@
 import {UnexpectedObjectError} from './error';
-import {type FileWithPath, toFileWithPath} from './file';
+import {type FileWithPath, toFileWithPath, withMimeType} from './file';
+import {DEFAULT_MIME_TYPES} from './mime-default';
 
 const FILES_TO_IGNORE = [
     // Thumbnail cache files for macOS and Windows
     '.DS_Store', // macOs
     'Thumbs.db' // Windows
 ];
+
+export interface FromEventOptions {
+    /**
+     * Extension-to-MIME lookup used to set `type` on files the browser left typeless.
+     * Defaults to a small built-in set of common types ({@link DEFAULT_MIME_TYPES}).
+     *
+     * The full extension-to-MIME table (~1,200 entries) is not bundled into the main entry;
+     * import it from the `file-selector/mime` subpath when broader coverage is needed:
+     *
+     * ```ts
+     * import {fromEvent} from 'file-selector';
+     * import {COMMON_MIME_TYPES} from 'file-selector/mime';
+     * await fromEvent(evt, {mimeTypes: COMMON_MIME_TYPES});
+     * ```
+     *
+     * See https://github.com/react-dropzone/file-selector/issues/127
+     */
+    mimeTypes?: Map<string, string>;
+}
 
 /**
  * Convert a DragEvent's DataTrasfer object to a list of File objects
@@ -16,8 +36,19 @@ const FILES_TO_IGNORE = [
  * and a list of File objects will be returned.
  *
  * @param evt
+ * @param options
  */
-export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
+export async function fromEvent(
+    evt: Event | any,
+    {mimeTypes = DEFAULT_MIME_TYPES}: FromEventOptions = {}
+): Promise<(FileWithPath | DataTransferItem)[]> {
+    const items = await getFilesOrItems(evt);
+    // Guess a MIME type from the file extension once, over the final flat list, for any file the
+    // browser left typeless. DataTransferItems (returned for non-'drop' drag events) pass through as-is.
+    return items.map(item => (item instanceof File ? withMimeType(item, mimeTypes) : item));
+}
+
+async function getFilesOrItems(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
     if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
         return getDataTransferFiles(evt.dataTransfer, evt.type);
     } else if (isChangeEvt(evt)) {

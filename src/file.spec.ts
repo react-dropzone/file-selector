@@ -1,4 +1,6 @@
-import {COMMON_MIME_TYPES, toFileWithPath} from './file';
+import {toFileWithPath, withMimeType} from './file';
+import {COMMON_MIME_TYPES} from './mime';
+import {DEFAULT_MIME_TYPES} from './mime-default';
 
 describe('toFile()', () => {
     it('should be an instance of a File', () => {
@@ -114,7 +116,7 @@ describe('toFile()', () => {
         const types = Array.from(COMMON_MIME_TYPES.values());
         const files = Array.from(COMMON_MIME_TYPES.keys())
             .map(ext => new File([], `test.${ext}`))
-            .map(f => toFileWithPath(f));
+            .map(f => withMimeType(f, COMMON_MIME_TYPES));
 
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);
@@ -123,7 +125,7 @@ describe('toFile()', () => {
 
     test('{type} is enumerable', () => {
         const file = new File([], 'test.gif');
-        const fileWithPath = toFileWithPath(file);
+        const fileWithPath = withMimeType(toFileWithPath(file), DEFAULT_MIME_TYPES);
 
         expect(Object.keys(fileWithPath)).toContain('type');
 
@@ -140,7 +142,7 @@ describe('toFile()', () => {
         const files = Array.from(COMMON_MIME_TYPES.keys())
             .map(key => key.toUpperCase())
             .map(ext => new File([], `test.${ext}`))
-            .map(f => toFileWithPath(f));
+            .map(f => withMimeType(f, COMMON_MIME_TYPES));
 
         for (const file of files) {
             expect(types.includes(file.type)).toBe(true);

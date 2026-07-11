@@ -1,2 +1,3 @@
 export type {FileWithPath} from './file';
-export {fromEvent} from './file-selector';
+export {type FromEventOptions, fromEvent} from './file-selector';
+export {DEFAULT_MIME_TYPES} from './mime-default';
