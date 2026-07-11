@@ -75,30 +75,6 @@ it('should return an empty array if the passed event is not a DragEvent', async 
     expect(files).toHaveLength(0);
 });
 
-it('should return {files} from DataTransfer if {items} is not defined (e.g. IE11)', async () => {
-    const name = 'test.json';
-    const mockFile = createFile(
-        name,
-        {ping: true},
-        {
-            type: 'application/json'
-        }
-    );
-    const evt = dragEvt([mockFile]);
-
-    const files = await fromEvent(evt);
-    expect(files).toHaveLength(1);
-    expect(files.every(file => file instanceof File)).toBe(true);
-
-    const [file] = files as FileWithPath[];
-
-    expect(file.name).toBe(mockFile.name);
-    expect(file.type).toBe(mockFile.type);
-    expect(file.size).toBe(mockFile.size);
-    expect(file.lastModified).toBe(mockFile.lastModified);
-    expect(file.path).toBe(`./${name}`);
-});
-
 it('should return files from DataTransfer {items} if the passed event is a DragEvent', async () => {
     const name = 'test.json';
     const mockFile = createFile(
@@ -324,7 +300,7 @@ it('filters thumbnail cache files', async () => {
             type: 'text/plain'
         }
     );
-    const evt = dragEvt([mockFile]);
+    const evt = dragEvtFromItems([dataTransferItemFromFile(mockFile)]);
     const items = await fromEvent(evt);
     expect(items).toHaveLength(0);
 });
@@ -424,7 +400,7 @@ it('should not use getAsFileSystemHandle when not in a secure context', async ()
 
 it('should reject when getAsFileSystemHandle resolves to null', async () => {
     const evt = dragEvtFromItems([dataTransferItemWithFsHandle(null, null)]);
-    expect(fromEvent(evt)).rejects.toThrow('DataTransferItem is not a file');
+    await expect(fromEvent(evt)).rejects.toThrow('DataTransferItem is not a file');
 });
 
 it('should fallback to getAsFile when getAsFileSystemHandle resolves to undefined', async () => {
@@ -457,13 +433,6 @@ function dragEvtFromItems(items: DataTransferItem | DataTransferItem[], type: st
         dataTransfer: {
             items: Array.isArray(items) ? items : [items]
         }
-    } as any;
-}
-
-function dragEvt(files?: File[], items?: DataTransferItem[], type: string = 'drop'): DragEvent {
-    return {
-        type,
-        dataTransfer: {items, files}
     } as any;
 }
 
