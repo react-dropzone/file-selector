@@ -215,6 +215,64 @@ it('can read a tree of directories recursively and return a flat list of FileWit
     expect(files).toEqual(mockFiles);
 });
 
+it('reads directories via getAsFileSystemHandle when the legacy readEntries API throws (issue #130)', async () => {
+    const mockFiles = sortFiles([createFile('ping.json', {ping: true}), createFile('pong.json', {pong: true})]);
+    const [f1, f2] = mockFiles;
+
+    // Simulate Windows/Chromium: the legacy Entry API throws on readEntries()...
+    const throwingEntry = fileSystemDirEntryThatThrows();
+    // ...but the File System Access API traverses the same directory successfully.
+    const handle = fsDirectoryHandle('root', [fsFileHandle(f1), fsFileHandle(f2)]);
+    const evt = dragEvtFromItems([dataTransferItemFromDir(throwingEntry, handle)]);
+
+    const items = await fromEvent(evt);
+    const files = sortFiles(items as FileWithPath[]);
+    expect(files).toHaveLength(2);
+    expect(files.every(file => file instanceof File)).toBe(true);
+    expect(files.map(file => file.name)).toEqual(['ping.json', 'pong.json']);
+    expect(files.map(file => file.path)).toEqual(['/root/ping.json', '/root/pong.json']);
+});
+
+it('reads a tree of directories via getAsFileSystemHandle and keeps nested paths and handles', async () => {
+    const f1 = createFile('foo.json', {foo: true});
+    const f2 = createFile('bar.json', {bar: true});
+    const f3 = createFile('baz.json', {baz: true});
+    const ignored = createFile('.DS_Store', {macOs: true});
+
+    const handle = fsDirectoryHandle('root', [
+        fsFileHandle(f1),
+        fsDirectoryHandle('nested', [fsFileHandle(f2), fsFileHandle(ignored)]),
+        fsFileHandle(f3)
+    ]);
+    const evt = dragEvtFromItems([dataTransferItemFromDir(fileSystemDirEntryThatThrows(), handle)]);
+
+    const items = await fromEvent(evt);
+    const files = sortFiles(items as FileWithPath[]);
+    // The macOS thumbnail cache file is filtered out.
+    expect(files).toHaveLength(3);
+    expect(files.map(file => file.path).sort()).toEqual(['/root/baz.json', '/root/foo.json', '/root/nested/bar.json']);
+    expect(files.every(file => typeof (file as any).handle?.getFile === 'function')).toBe(true);
+});
+
+it('falls back to the legacy readEntries API for directories when not in a secure context', async () => {
+    const mockFiles = sortFiles([createFile('ping.json', {ping: true}), createFile('pong.json', {pong: true})]);
+    const [f1, f2] = mockFiles;
+
+    const entry = fileSystemDirEntryFromFile([fileSystemFileEntryFromFile(f1), fileSystemFileEntryFromFile(f2)], 2);
+    // A directory handle would be preferred, but it must be ignored outside a secure context.
+    const handle = fsDirectoryHandle('root', [fsFileHandle(createFile('should-not-appear.json', {}))]);
+    const evt = dragEvtFromItems([dataTransferItemFromDir(entry, handle)]);
+
+    window.isSecureContext = false;
+
+    const items = await fromEvent(evt);
+    const files = sortFiles(items as FileWithPath[]);
+    expect(files).toHaveLength(2);
+    expect(files.map(file => file.name)).toEqual(['ping.json', 'pong.json']);
+
+    window.isSecureContext = true;
+});
+
 it('returns the DataTransfer {items} if the DragEvent {type} is not "drop"', async () => {
     const name = 'test.json';
     const mockFile = createFile(
@@ -526,6 +584,54 @@ function fileSystemDirEntryFromFile(files: FileOrDirEntry[], batchSize: number =
     };
 }
 
+function dataTransferItemFromDir(entry: DirEntry, handle: any): DataTransferItem {
+    return {
+        kind: 'file',
+        getAsFile() {
+            return null;
+        },
+        webkitGetAsEntry: () => entry,
+        getAsFileSystemHandle: () => Promise.resolve(handle)
+    } as any;
+}
+
+// A directory entry whose legacy readEntries() throws, mimicking Windows/Chromium (see issue #130).
+function fileSystemDirEntryThatThrows(): DirEntry {
+    return {
+        isDirectory: true,
+        isFile: false,
+        createReader: () => ({
+            readEntries() {
+                throw new DOMException('A URI supplied to the API was malformed', 'EncodingError');
+            }
+        })
+    } as any;
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle
+function fsDirectoryHandle(name: string, children: FsHandle[]): FsHandle {
+    return {
+        kind: 'directory',
+        name,
+        async *values() {
+            for (const child of children) {
+                yield child;
+            }
+        }
+    };
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle
+function fsFileHandle(file: File): FsHandle {
+    return {
+        kind: 'file',
+        name: file.name,
+        getFile() {
+            return Promise.resolve(file);
+        }
+    };
+}
+
 function inputEvtFromFiles(...files: File[]): Event {
     const input = document.createElement('input');
     if (files.length) {
@@ -587,4 +693,12 @@ interface Entry {
 
 interface DirReader {
     readEntries(cb: (entries: FileOrDirEntry[]) => void, errCb: (err: any) => void): void;
+}
+
+// A minimal stand-in for FileSystemFileHandle/FileSystemDirectoryHandle.
+interface FsHandle {
+    kind: 'file' | 'directory';
+    name: string;
+    getFile?(): Promise<File>;
+    values?(): AsyncIterableIterator<FsHandle>;
 }
