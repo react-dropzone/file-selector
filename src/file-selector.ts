@@ -1,12 +1,10 @@
-import {FileWithPath, toFileWithPath} from './file';
-
+import {type FileWithPath, toFileWithPath} from './file';
 
 const FILES_TO_IGNORE = [
     // Thumbnail cache files for macOS and Windows
     '.DS_Store', // macOs
-    'Thumbs.db'  // Windows
+    'Thumbs.db' // Windows
 ];
-
 
 /**
  * Convert a DragEvent's DataTrasfer object to a list of File objects
@@ -24,7 +22,7 @@ export async function fromEvent(evt: Event | any): Promise<(FileWithPath | DataT
     } else if (isChangeEvt(evt)) {
         return getInputFiles(evt);
     } else if (Array.isArray(evt) && evt.every(item => 'getFile' in item && typeof item.getFile === 'function')) {
-        return getFsHandleFiles(evt)
+        return getFsHandleFiles(evt);
     }
     return [];
 }
@@ -38,7 +36,7 @@ function isChangeEvt(value: any): value is Event {
 }
 
 function isObject<T>(v: any): v is T {
-    return typeof v === 'object' && v !== null
+    return typeof v === 'object' && v !== null;
 }
 
 function getInputFiles(evt: Event) {
@@ -51,13 +49,11 @@ async function getFsHandleFiles(handles: any[]) {
     return files.map(file => toFileWithPath(file));
 }
 
-
 async function getDataTransferFiles(dt: DataTransfer, type: string) {
     // IE11 does not support dataTransfer.items
     // See https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/items#Browser_compatibility
     if (dt.items) {
-        const items = fromList<DataTransferItem>(dt.items)
-            .filter(item => item.kind === 'file');
+        const items = fromList<DataTransferItem>(dt.items).filter(item => item.kind === 'file');
         // According to https://html.spec.whatwg.org/multipage/dnd.html#dndevents,
         // only 'dragstart' and 'drop' has access to the data (source node)
         if (type !== 'drop') {
@@ -67,8 +63,7 @@ async function getDataTransferFiles(dt: DataTransfer, type: string) {
         return noIgnoredFiles(flatten<FileWithPath>(files));
     }
 
-    return noIgnoredFiles(fromList<FileWithPath>(dt.files)
-        .map(file => toFileWithPath(file)));
+    return noIgnoredFiles(fromList<FileWithPath>(dt.files).map(file => toFileWithPath(file)));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {
@@ -86,7 +81,6 @@ function fromList<T>(items: DataTransferItemList | FileList | null): T[] {
 
     const files = [];
 
-    // tslint:disable: prefer-for-of
     for (let i = 0; i < items.length; i++) {
         const file = items[i];
         files.push(file);
@@ -106,7 +100,7 @@ function toFilePromises(item: DataTransferItem) {
     // Safari supports dropping an image node from a different window and can be retrieved using
     // the DataTransferItem.getAsFile() API
     // NOTE: FileSystemEntry.file() throws if trying to get the file
-    if (entry && entry.isDirectory) {
+    if (entry?.isDirectory) {
         return fromDirEntry(entry) as any;
     }
 
@@ -114,10 +108,15 @@ function toFilePromises(item: DataTransferItem) {
 }
 
 function flatten<T>(items: any[]): T[] {
-    return items.reduce((acc, files) => [
-        ...acc,
-        ...(Array.isArray(files) ? flatten(files) : [files])
-    ], []);
+    const result: T[] = [];
+    for (const item of items) {
+        if (Array.isArray(item)) {
+            result.push(...flatten<T>(item));
+        } else {
+            result.push(item);
+        }
+    }
+    return result;
 }
 
 async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
@@ -163,25 +162,28 @@ function fromDirEntry(entry: any) {
         function readEntries() {
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader
             // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryReader/readEntries
-            reader.readEntries(async (batch: any[]) => {
-                if (!batch.length) {
-                    // Done reading directory
-                    try {
-                        const files = await Promise.all(entries);
-                        resolve(files);
-                    } catch (err) {
-                        reject(err);
-                    }
-                } else {
-                    const items = Promise.all(batch.map(fromEntry));
-                    entries.push(items);
+            reader.readEntries(
+                async (batch: any[]) => {
+                    if (!batch.length) {
+                        // Done reading directory
+                        try {
+                            const files = await Promise.all(entries);
+                            resolve(files);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    } else {
+                        const items = Promise.all(batch.map(fromEntry));
+                        entries.push(items);
 
-                    // Continue reading
-                    readEntries();
+                        // Continue reading
+                        readEntries();
+                    }
+                },
+                (err: any) => {
+                    reject(err);
                 }
-            }, (err: any) => {
-                reject(err);
-            });
+            );
         }
 
         readEntries();
@@ -191,17 +193,19 @@ function fromDirEntry(entry: any) {
 // https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry
 async function fromFileEntry(entry: any) {
     return new Promise<FileWithPath>((resolve, reject) => {
-        entry.file((file: FileWithPath) => {
-            const fwp = toFileWithPath(file, entry.fullPath);
-            resolve(fwp);
-        }, (err: any) => {
-            reject(err);
-        });
+        entry.file(
+            (file: FileWithPath) => {
+                const fwp = toFileWithPath(file, entry.fullPath);
+                resolve(fwp);
+            },
+            (err: any) => {
+                reject(err);
+            }
+        );
     });
 }
 
 // Infinite type recursion
 // https://github.com/Microsoft/TypeScript/issues/3496#issuecomment-128553540
 interface FileArray extends Array<FileValue> {}
-type FileValue = FileWithPath
-    | FileArray[];
+type FileValue = FileWithPath | FileArray[];

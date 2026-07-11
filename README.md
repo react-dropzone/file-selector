@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/file-selector.svg?style=flat-square)](https://www.npmjs.com/package/file-selector)
 ![Tests](https://img.shields.io/github/actions/workflow/status/react-dropzone/file-selector/test.yml?branch=main&style=flat-square&label=tests)
-[![codecov](https://img.shields.io/coveralls/github/react-dropzone/file-selector/main?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=main)
+[![coverage](https://img.shields.io/coveralls/github/react-dropzone/file-selector/main?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=main)
 [![Open Collective Backers](https://img.shields.io/opencollective/backers/react-dropzone.svg?style=flat-square)](#backers)
 [![Open Collective Sponsors](https://img.shields.io/opencollective/sponsors/react-dropzone.svg?style=flat-square)](#sponsors)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat-square)](https://github.com/react-dropzone/.github/blob/main/CODE_OF_CONDUCT.md)
@@ -27,17 +27,16 @@ npm add file-selector
 ```
 
 ### CDN
-For CDN, you can use [unpkg](https://unpkg.com):
+For CDN usage, load the ESM build directly from a CDN such as [esm.sh](https://esm.sh) or [jsDelivr](https://www.jsdelivr.com/package/npm/file-selector):
+```html
+<script type="module">
+    import {fromEvent} from 'https://esm.sh/file-selector';
 
-[https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js](https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js)
-
-The global namespace for file-selector is `fileSelector`:
-```js
-const {fromEvent} = fileSelector;
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
-    console.log(files);
-});
+    document.addEventListener('drop', async evt => {
+        const files = await fromEvent(evt);
+        console.log(files);
+    });
+</script>
 ```
 
 
@@ -105,6 +104,33 @@ For folder drop we use the [FileSystem API](https://developer.mozilla.org/en-US/
 ## Contribute
 Checkout the organization [CONTRIBUTING.md](https://github.com/react-dropzone/.github/blob/main/CONTRIBUTING.md).
 
+### Development
+
+Development requires [Node.js](https://nodejs.org) >= 20. Install the dependencies with:
+```bash
+npm install
+```
+
+The project is built with [tsdown](https://tsdown.dev) (Rolldown), type-checked with [TypeScript](https://www.typescriptlang.org), tested with [Vitest](https://vitest.dev) and linted/formatted with [oxlint](https://oxc.rs) and [oxfmt](https://oxc.rs).
+
+| Command | Description |
+| --- | --- |
+| `npm test` | Run the test suite in watch mode. |
+| `npm run test:cov` | Run the tests once with coverage (runs type-check, lint and format check first). |
+| `npm run type-check` | Type-check the sources without emitting. |
+| `npm run lint` | Lint the sources (oxlint). |
+| `npm run lint:fix` | Apply safe lint fixes. |
+| `npm run lint:type-aware` | Type-aware lint via tsgolint (alpha). |
+| `npm run format` | Format the sources (oxfmt). |
+| `npm run format:check` | Check formatting without writing. |
+| `npm run build` | Build the outputs into `dist/`. |
+| `npm run dev` | Build in watch mode. |
+
+The build emits into `dist/`:
+- `dist/index.js` — ES module
+- `dist/index.cjs` — CommonJS module
+- `dist/index.d.ts` — TypeScript declarations
+
 ## Credits
 * [html5-file-selector](https://github.com/quarklemotion/html5-file-selector)
 
@@ -113,32 +139,12 @@ Checkout the organization [CONTRIBUTING.md](https://github.com/react-dropzone/.g
 ### Backers
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/react-dropzone#backer)]
 
-<a href="https://opencollective.com/react-dropzone/backer/0/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/0/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/1/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/1/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/2/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/2/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/3/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/3/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/4/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/4/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/5/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/5/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/6/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/6/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/7/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/7/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/8/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/8/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/9/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/9/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/backer/10/website" target="_blank"><img src="https://opencollective.com/react-dropzone/backer/10/avatar.svg"></a>
+<a href="https://opencollective.com/react-dropzone#backers" target="_blank"><img src="https://opencollective.com/react-dropzone/backers.svg?width=890"></a>
 
 ### Sponsors
 Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/react-dropzone#sponsor)]
 
-<a href="https://opencollective.com/react-dropzone/sponsor/0/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/1/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/2/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/3/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/4/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/5/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/6/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/7/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/8/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/9/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/9/avatar.svg"></a>
-<a href="https://opencollective.com/react-dropzone/sponsor/10/website" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/react-dropzone#sponsors" target="_blank"><img src="https://opencollective.com/react-dropzone/sponsors.svg?width=890"></a>
 
 ## License
 MIT
