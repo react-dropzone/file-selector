@@ -1,4 +1,4 @@
-export const COMMON_MIME_TYPES = new Map([
+export const COMMON_MIME_TYPES: Map<string, string> = new Map([
     // https://github.com/guzzle/psr7/blob/2d9260799e713f1c475d3c5fdc3d6561ff7441b2/src/MimeType.php
     ['1km', 'application/vnd.1000minds.decision-model+xml'],
     ['3dml', 'text/vnd.in3d.3dml'],
@@ -1202,19 +1202,20 @@ export const COMMON_MIME_TYPES = new Map([
     ['zsh', 'text/x-scriptzsh']
 ]);
 
-
 export function toFileWithPath(file: FileWithPath, path?: string, h?: FileSystemHandle): FileWithPath {
     const f = withMimeType(file);
     const {webkitRelativePath} = file;
-    const p = typeof path === 'string'
-        ? path
-        // If <input webkitdirectory> is set,
-        // the File will have a {webkitRelativePath} property
-        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
-        : typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
-            ? webkitRelativePath
-            : `./${file.name}`;
-    if (typeof f.path !== 'string') { // on electron, path is already set to the absolute path
+    const p =
+        typeof path === 'string'
+            ? path
+            : // If <input webkitdirectory> is set,
+              // the File will have a {webkitRelativePath} property
+              // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+              typeof webkitRelativePath === 'string' && webkitRelativePath.length > 0
+              ? webkitRelativePath
+              : `./${file.name}`;
+    if (typeof f.path !== 'string') {
+        // on electron, path is already set to the absolute path
         setObjProp(f, 'path', p);
     }
     if (h !== undefined) {
@@ -1241,8 +1242,7 @@ function withMimeType(file: FileWithPath) {
     const hasExtension = name && name.lastIndexOf('.') !== -1;
 
     if (hasExtension && !file.type) {
-        const ext = name.split('.')
-            .pop()!.toLowerCase();
+        const ext = name.split('.').pop()!.toLowerCase();
         const type = COMMON_MIME_TYPES.get(ext);
         if (type) {
             Object.defineProperty(file, 'type', {
@@ -1263,5 +1263,5 @@ function setObjProp(f: FileWithPath, key: string, value: string) {
         writable: false,
         configurable: false,
         enumerable: true
-    })
+    });
 }

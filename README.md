@@ -27,17 +27,16 @@ npm add file-selector
 ```
 
 ### CDN
-For CDN, you can use [unpkg](https://unpkg.com):
+For CDN usage, load the ESM build directly from a CDN such as [esm.sh](https://esm.sh) or [jsDelivr](https://www.jsdelivr.com/package/npm/file-selector):
+```html
+<script type="module">
+    import {fromEvent} from 'https://esm.sh/file-selector';
 
-[https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js](https://unpkg.com/file-selector/dist/bundles/file-selector.umd.min.js)
-
-The global namespace for file-selector is `fileSelector`:
-```js
-const {fromEvent} = fileSelector;
-document.addEventListener('drop', async evt => {
-    const files = await fromEvent(evt);
-    console.log(files);
-});
+    document.addEventListener('drop', async evt => {
+        const files = await fromEvent(evt);
+        console.log(files);
+    });
+</script>
 ```
 
 
@@ -104,6 +103,31 @@ For folder drop we use the [FileSystem API](https://developer.mozilla.org/en-US/
 
 ## Contribute
 Checkout the organization [CONTRIBUTING.md](https://github.com/react-dropzone/.github/blob/main/CONTRIBUTING.md).
+
+### Development
+
+Development requires [Node.js](https://nodejs.org) >= 20. Install the dependencies with:
+```bash
+npm install
+```
+
+The project is built with [rslib](https://lib.rsbuild.dev) (Rspack/SWC), type-checked with [TypeScript](https://www.typescriptlang.org), tested with [Vitest](https://vitest.dev) and linted/formatted with [Biome](https://biomejs.dev).
+
+| Command | Description |
+| --- | --- |
+| `npm test` | Run the test suite in watch mode. |
+| `npm run test:cov` | Run the tests once with coverage (runs type-check and lint first). |
+| `npm run type-check` | Type-check the sources without emitting. |
+| `npm run lint` | Check linting and formatting. |
+| `npm run lint:fix` | Apply safe lint and format fixes. |
+| `npm run format` | Format the sources. |
+| `npm run build` | Build the outputs into `dist/`. |
+| `npm run dev` | Build in watch mode. |
+
+The build emits into `dist/`:
+- `dist/index.js` — ES module
+- `dist/index.cjs` — CommonJS module
+- `dist/index.d.ts` — TypeScript declarations
 
 ## Credits
 * [html5-file-selector](https://github.com/quarklemotion/html5-file-selector)
