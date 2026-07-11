@@ -33,3 +33,7 @@ docs
 dist
 out-tsc
 tmp
+
+## Playwright
+test-results
+playwright-report
