@@ -1,51 +1,51 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>file-selector e2e</title>
-    </head>
-    <body style="margin: 0">
-        <!-- Full-viewport drop target so CDP drag coordinates always land on it. -->
-        <div id="drop" style="width: 100vw; height: 100vh"></div>
-        <input id="input" type="file" multiple />
-        <input id="input-dir" type="file" webkitdirectory />
+  <head>
+    <meta charset="utf-8" />
+    <title>file-selector e2e</title>
+  </head>
+  <body style="margin: 0">
+    <!-- Full-viewport drop target so CDP drag coordinates always land on it. -->
+    <div id="drop" style="width: 100vw; height: 100vh"></div>
+    <input id="input" type="file" multiple />
+    <input id="input-dir" type="file" webkitdirectory />
 
-        <!-- Import the built bundle, so these tests exercise the shipped artifact. -->
-        <script type="module">
-            import {fromEvent} from '/dist/index.js';
+    <!-- Import the built bundle, so these tests exercise the shipped artifact. -->
+    <script type="module">
+      import {fromEvent} from "/dist/index.js";
 
-            window.__result = null;
-            window.__error = null;
+      window.__result = null;
+      window.__error = null;
 
-            async function handle(evt) {
-                try {
-                    const files = await fromEvent(evt);
-                    window.__result = files.map(file => ({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        path: file.path,
-                        relativePath: file.relativePath,
-                        isFile: file instanceof File,
-                        hasHandle: typeof file.handle?.getFile === 'function'
-                    }));
-                } catch (err) {
-                    window.__error = String((err && err.message) || err);
-                }
-            }
+      async function handle(evt) {
+        try {
+          const files = await fromEvent(evt);
+          window.__result = files.map(file => ({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            path: file.path,
+            relativePath: file.relativePath,
+            isFile: file instanceof File,
+            hasHandle: typeof file.handle?.getFile === "function"
+          }));
+        } catch (err) {
+          window.__error = String((err && err.message) || err);
+        }
+      }
 
-            const drop = document.getElementById('drop');
-            for (const type of ['dragenter', 'dragover']) {
-                drop.addEventListener(type, evt => evt.preventDefault());
-            }
-            drop.addEventListener('drop', evt => {
-                evt.preventDefault();
-                handle(evt);
-            });
-            document.getElementById('input').addEventListener('change', handle);
-            document.getElementById('input-dir').addEventListener('change', handle);
+      const drop = document.getElementById("drop");
+      for (const type of ["dragenter", "dragover"]) {
+        drop.addEventListener(type, evt => evt.preventDefault());
+      }
+      drop.addEventListener("drop", evt => {
+        evt.preventDefault();
+        handle(evt);
+      });
+      document.getElementById("input").addEventListener("change", handle);
+      document.getElementById("input-dir").addEventListener("change", handle);
 
-            window.__ready = true;
-        </script>
-    </body>
+      window.__ready = true;
+    </script>
+  </body>
 </html>

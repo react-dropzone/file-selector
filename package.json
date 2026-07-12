@@ -2,7 +2,30 @@
   "name": "file-selector",
   "version": "0.0.0-development",
   "description": "Convert DataTransfer object to a list of File objects",
+  "keywords": [
+    "DataTransfer",
+    "File",
+    "drag-and-drop",
+    "file-api",
+    "html5"
+  ],
+  "homepage": "https://github.com/react-dropzone/file-selector",
+  "license": "MIT",
+  "author": {
+    "name": "Roland Groza",
+    "email": "rolandjitsu@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-dropzone/file-selector.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.spec.*"
+  ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,29 +42,6 @@
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
-  "files": [
-    "dist",
-    "src",
-    "!src/**/*.spec.*"
-  ],
-  "keywords": [
-    "drag-and-drop",
-    "html5",
-    "file-api",
-    "DataTransfer",
-    "File"
-  ],
-  "homepage": "https://github.com/react-dropzone/file-selector",
-  "license": "MIT",
-  "author": {
-    "name": "Roland Groza",
-    "email": "rolandjitsu@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/react-dropzone/file-selector.git"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -54,8 +54,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "lint:type-aware": "oxlint --type-aware",
-    "format": "oxfmt \"src/**/*.ts\" \"e2e/**/*.ts\" \"*.ts\"",
-    "format:check": "oxfmt --check \"src/**/*.ts\" \"e2e/**/*.ts\" \"*.ts\"",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "pretest:cov": "npm run type-check && npm run lint && npm run format:check",
     "test": "vitest",
     "test:cov": "vitest run --coverage",
@@ -86,19 +86,25 @@
     "vocs": "^2.5.3",
     "waku": "^1.0.0-beta.6"
   },
-  "engines": {
-    "node": ">= 20"
-  },
   "size-limit": [
     {
       "name": "core, esm (fromEvent + default MIME map)",
-      "path": ["dist/index.js", "dist/mime-default.js"],
+      "path": [
+        "dist/index.js",
+        "dist/mime-default.js"
+      ],
       "limit": "3 kB"
     },
     {
       "name": "core, cjs (fromEvent + default MIME map)",
-      "path": ["dist/index.cjs", "dist/mime-default.cjs"],
+      "path": [
+        "dist/index.cjs",
+        "dist/mime-default.cjs"
+      ],
       "limit": "4 kB"
     }
-  ]
+  ],
+  "engines": {
+    "node": ">= 20"
+  }
 }

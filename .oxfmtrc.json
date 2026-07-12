@@ -1,9 +1,9 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "useTabs": false,
-  "tabWidth": 4,
+  "tabWidth": 2,
   "printWidth": 120,
-  "singleQuote": true,
+  "singleQuote": false,
   "jsxSingleQuote": false,
   "quoteProps": "as-needed",
   "trailingComma": "none",
@@ -11,5 +11,5 @@
   "arrowParens": "avoid",
   "bracketSameLine": false,
   "bracketSpacing": false,
-  "ignorePatterns": []
+  "ignorePatterns": ["node_modules", "dist", "site", "coverage", "docs/dist", "docs/pages.gen.ts", ".vocs", "**/*.mdx"]
 }
