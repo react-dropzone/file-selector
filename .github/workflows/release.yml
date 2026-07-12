@@ -17,7 +17,7 @@ jobs:
       contents: write      # to be able to publish a GitHub release
       issues: write        # to be able to comment on released issues
       pull-requests: write # to be able to comment on released pull requests
-      id-token: write      # to enable use of OIDC for npm provenance
+      id-token: write      # OIDC for npm trusted publishing (+ provenance)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -38,5 +38,4 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release@^24
+        run: npx semantic-release@^25

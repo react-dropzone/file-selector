@@ -30,4 +30,4 @@ jobs:
       - name: Verify release (dry run)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release@^24 --dry-run
+        run: npx semantic-release@^25 --dry-run
