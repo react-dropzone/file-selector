@@ -1,0 +1,103 @@
+---
+title: Getting Started
+description: Install file-selector and convert drops, file inputs and file-system handles into File objects.
+showAskAi: false
+---
+
+# Getting Started
+
+## Installation
+
+:::code-group
+
+```bash [npm]
+npm add file-selector
+```
+
+```bash [pnpm]
+pnpm add file-selector
+```
+
+```bash [yarn]
+yarn add file-selector
+```
+
+:::
+
+### CDN
+
+For CDN usage, load the ESM build directly from a CDN such as [esm.sh](https://esm.sh) or
+[jsDelivr](https://www.jsdelivr.com/package/npm/file-selector):
+
+```html
+<script type="module">
+  import {fromEvent} from 'https://esm.sh/file-selector';
+
+  document.addEventListener('drop', async evt => {
+    const files = await fromEvent(evt);
+    console.log(files);
+  });
+</script>
+```
+
+## Usage
+
+### From a drag event
+
+Convert a [`DragEvent`](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) to `File` objects.
+Dropped directories are traversed recursively and flattened into a single list, with each entry's
+location preserved on its `path` property.
+
+```ts
+import {fromEvent} from 'file-selector';
+
+document.addEventListener('drop', async evt => {
+  const files = await fromEvent(evt);
+  console.log(files);
+});
+```
+
+### From a file input
+
+Convert a [change event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event)
+for an `<input type="file">` to `File` objects:
+
+```ts
+import {fromEvent} from 'file-selector';
+
+const input = document.getElementById('myInput');
+input.addEventListener('change', async evt => {
+  const files = await fromEvent(evt);
+  console.log(files);
+});
+```
+
+### From file-system handles
+
+Convert [`FileSystemFileHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle)
+items to `File` objects:
+
+```ts
+import {fromEvent} from 'file-selector';
+
+// Open the file picker
+const handles = await window.showOpenFilePicker({multiple: true});
+// Get the files
+const files = await fromEvent(handles);
+console.log(files);
+```
+
+:::warning
+The File System Access API path is experimental and subject to change.
+:::
+
+### CommonJS
+
+```ts
+const {fromEvent} = require('file-selector');
+
+document.addEventListener('drop', async evt => {
+  const files = await fromEvent(evt);
+  console.log(files);
+});
+```
