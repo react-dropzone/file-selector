@@ -1,0 +1,61 @@
+---
+title: API Reference
+description: The fromEvent function and the FileWithPath type.
+showAskAi: false
+---
+
+# API Reference
+
+The public surface is intentionally tiny: one function and one type.
+
+## `fromEvent`
+
+```ts
+function fromEvent(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]>
+```
+
+Converts an event (or a list of file-system handles) into a flat list of files.
+
+**Accepts one of:**
+
+| Input | Source |
+| --- | --- |
+| A [`DragEvent`](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) | A `drop` (or other drag) event with a `dataTransfer` |
+| A [change `Event`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event) | An `<input type="file">` (optionally `webkitdirectory`) |
+| An array of [`FileSystemFileHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) | `window.showOpenFilePicker()` |
+
+**Returns** `Promise<(FileWithPath | DataTransferItem)[]>`:
+
+- For a `drop` event and for file inputs, entries are [`FileWithPath`](#filewithpath) objects.
+  Dropped directories are traversed recursively and flattened into the same list.
+- For non-`drop` drag events (e.g. `dragenter`/`dragover`), only `DataTransferItem`s are
+  returned, since file data is not yet accessible per the HTML drag-and-drop spec.
+- Anything unrecognized resolves to an empty array (`[]`) rather than throwing.
+
+## `FileWithPath`
+
+Every parsed file is a native [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File)
+augmented with its location:
+
+```ts
+interface FileWithPath extends File {
+  /** Full path of the file, e.g. `./photos/cat.png`. On Electron this is the absolute path. */
+  readonly path: string;
+  /** Path relative to the dropped/selected root, always populated. */
+  readonly relativePath: string;
+}
+```
+
+Because it extends `File`, the standard members (`name`, `size`, `type`, `lastModified`,
+`arrayBuffer()`, `text()`, `stream()`, …) are all available.
+
+```ts
+import {fromEvent} from 'file-selector';
+
+const files = await fromEvent(evt);
+for (const file of files) {
+  if (file instanceof File) {
+    console.log(file.path, file.name, file.type, file.size);
+  }
+}
+```

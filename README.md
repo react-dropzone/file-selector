@@ -2,6 +2,8 @@
 
 > A small package for converting a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) or [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file) to a list of File objects.
 
+📖 **[Documentation & live playground →](https://react-dropzone.github.io/file-selector/)**
+
 [![npm](https://img.shields.io/npm/v/file-selector.svg?style=flat-square)](https://www.npmjs.com/package/file-selector)
 ![Tests](https://img.shields.io/github/actions/workflow/status/react-dropzone/file-selector/test.yml?branch=main&style=flat-square&label=tests)
 [![coverage](https://img.shields.io/coveralls/github/react-dropzone/file-selector/main?style=flat-square)](https://coveralls.io/github/react-dropzone/file-selector?branch=main)
@@ -141,6 +143,9 @@ The project is built with [tsdown](https://tsdown.dev) (Rolldown), type-checked 
 | `npm run format:check` | Check formatting without writing. |
 | `npm run build` | Build the outputs into `dist/`. |
 | `npm run dev` | Build in watch mode. |
+| `npm run docs:dev` | Run the [Vocs](https://vocs.dev) docs site locally. |
+| `npm run docs:build` | Build the docs site into `site/`. |
+| `npm run docs:preview` | Preview the built docs site. |
 
 The build emits into `dist/`:
 - `dist/index.js` — ES module

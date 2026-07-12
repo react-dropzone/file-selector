@@ -1,0 +1,21 @@
+---
+layout: landing
+showSidebar: false
+showAskAi: false
+---
+
+import {HomePage} from 'vocs';
+
+{/* Keep Tagline/Description on a single line each: multi-line children get wrapped in a
+    <p> by MDX, which nests inside the component's own <p> and causes a hydration reflow. */}
+
+<HomePage.Root>
+  <HomePage.Tagline>Convert drops and file inputs into File objects</HomePage.Tagline>
+  <HomePage.Description>A tiny, zero-dependency library that turns a DragEvent, a file input, or File System Access handles into a flat list of File objects — traversing dropped folders and preserving each file's path. It's the parsing layer behind react-dropzone.</HomePage.Description>
+  <HomePage.InstallPackage name="file-selector" type="install" />
+  <HomePage.Buttons>
+    <HomePage.Button href="/getting-started" variant="accent">Get started</HomePage.Button>
+    <HomePage.Button href="/playground">Playground</HomePage.Button>
+    <HomePage.Button href="https://github.com/react-dropzone/file-selector">GitHub</HomePage.Button>
+  </HomePage.Buttons>
+</HomePage.Root>

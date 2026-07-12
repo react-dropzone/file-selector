@@ -29,7 +29,6 @@ Icon
 ## Dist
 coverage
 build
-docs
 dist
 out-tsc
 tmp
@@ -37,3 +36,8 @@ tmp
 ## Playwright
 test-results
 playwright-report
+
+## Vocs (docs build output, cache, generated route types)
+.vocs
+site
+docs/pages.gen.ts

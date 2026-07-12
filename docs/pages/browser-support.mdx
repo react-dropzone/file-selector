@@ -1,0 +1,31 @@
+---
+title: Browser Support
+description: Which browser APIs file-selector relies on, and how well they are supported.
+showAskAi: false
+---
+
+# Browser Support
+
+Most browsers support basic file selection with drag & drop or a file input:
+
+- [File API](https://developer.mozilla.org/en-US/docs/Web/API/File#Browser_compatibility)
+- [Drag Event](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent#Browser_compatibility)
+- [DataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer#Browser_compatibility)
+- [`<input type="file">`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#Browser_compatibility)
+
+## Folder drop
+
+For folder drop we use the [File System API](https://developer.mozilla.org/en-US/docs/Web/API/FileSystem),
+which has more limited support:
+
+- [DataTransferItem.getAsFile()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/getAsFile#Browser_compatibility)
+- [DataTransferItem.webkitGetAsEntry()](https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry#Browser_compatibility)
+- [FileSystemEntry](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry#Browser_compatibility)
+- [FileSystemFileEntry.file()](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileEntry/file#Browser_compatibility)
+- [FileSystemDirectoryEntry.createReader()](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryEntry/createReader#Browser_compatibility)
+- [FileSystemDirectoryReader.readEntries()](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryReader/readEntries#Browser_compatibility)
+
+Where it's available, directory traversal prefers the newer
+[File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API),
+which avoids a class of failures in the legacy entries API (for example, dragging a folder from
+Windows Explorer into a Chromium browser).
