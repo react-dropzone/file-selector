@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import {useCallback, useRef, useState} from 'react';
-import {fromEvent} from '../../src';
+import {useCallback, useRef, useState} from "react";
+import {fromEvent} from "../../src";
 
 interface Row {
   path: string;
@@ -11,7 +11,7 @@ interface Row {
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  const units = ['KB', 'MB', 'GB'];
+  const units = ["KB", "MB", "GB"];
   let value = bytes / 1024;
   let i = 0;
   while (value >= 1024 && i < units.length - 1) {
@@ -36,9 +36,9 @@ export function Playground() {
       setRows(
         files.map(f => ({
           path: (f as {path?: string}).path ?? f.name,
-          type: f.type || '—',
-          size: f.size,
-        })),
+          type: f.type || "—",
+          size: f.size
+        }))
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -47,8 +47,8 @@ export function Playground() {
   }, []);
 
   const clear = useCallback(() => {
-    if (filesInput.current) filesInput.current.value = '';
-    if (dirInput.current) dirInput.current.value = '';
+    if (filesInput.current) filesInput.current.value = "";
+    if (dirInput.current) dirInput.current.value = "";
     setRows(null);
     setError(null);
   }, []);
@@ -58,7 +58,7 @@ export function Playground() {
       <style>{styles}</style>
 
       <div
-        className={active ? 'fsp-drop fsp-drop--active' : 'fsp-drop'}
+        className={active ? "fsp-drop fsp-drop--active" : "fsp-drop"}
         onDragEnter={e => {
           e.preventDefault();
           setActive(true);
@@ -90,7 +90,7 @@ export function Playground() {
       {/* `webkitdirectory` is not in React's typings; set it on the DOM node directly. */}
       <input
         ref={el => {
-          if (el) el.setAttribute('webkitdirectory', '');
+          if (el) el.setAttribute("webkitdirectory", "");
           (dirInput as {current: HTMLInputElement | null}).current = el;
         }}
         type="file"
@@ -104,7 +104,7 @@ export function Playground() {
           {rows && rows.length > 0 && (
             <>
               <span className="fsp-count">
-                {rows.length} File object{rows.length === 1 ? '' : 's'}
+                {rows.length} File object{rows.length === 1 ? "" : "s"}
               </span>
               <button type="button" className="fsp-clear" onClick={clear}>
                 Clear

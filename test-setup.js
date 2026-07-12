@@ -2,5 +2,5 @@
 Object.defineProperty(globalThis, "isSecureContext", {
   value: true,
   writable: true,
-  enumerable: true,
+  enumerable: true
 });
