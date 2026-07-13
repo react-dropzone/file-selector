@@ -423,6 +423,36 @@ it("should fallback to getAsFile when getAsFileSystemHandle resolves to undefine
   expect(file.path).toBe(`./${name}`);
 });
 
+it("falls back to getAsFile when getAsFileSystemHandle resolves to null (issue #1435)", async () => {
+  // Chromium returns a null FileSystemHandle for items with no backing handle, e.g. a file
+  // dragged out of a Windows archive. The item still has a File via getAsFile(), so the drop
+  // must not be lost. See https://github.com/react-dropzone/react-dropzone/issues/1435
+  const name = "from-archive.txt";
+  const mockFile = createFile(name, {ping: true}, {type: "text/plain"});
+  const evt = dragEvtFromItems([dataTransferItemWithFsHandle(mockFile, null)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+  expect(files.every(file => file instanceof File)).toBe(true);
+
+  const [file] = files as FileWithPath[];
+  expect(file.name).toBe(name);
+  expect(file.path).toBe(`./${name}`);
+});
+
+it("reads getAsFile() synchronously so awaiting getAsFileSystemHandle can't neuter it (issue #1435)", async () => {
+  // Faithful to real Chromium: getAsFileSystemHandle() resolves on a *later task*, and by the
+  // time it resolves the DataTransferItem has been neutered so getAsFile() returns null. The
+  // File must be captured synchronously (before the await) or the drop is silently lost.
+  const name = "neutered.txt";
+  const mockFile = createFile(name, {ping: true}, {type: "text/plain"});
+  const evt = dragEvtFromItems([dataTransferItemThatNeutersAfterHandleAwait(mockFile)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+  expect((files[0] as FileWithPath).name).toBe(name);
+});
+
 it("guesses the {type} from the extension using the built-in defaults", async () => {
   const mockFile = createFile("test.png", {ping: true}); // typeless File
   const evt = inputEvtFromFiles(mockFile);
@@ -525,6 +555,28 @@ function dataTransferItemWithFsHandle(file?: File | null, h?: FileSystemFileHand
     },
     getAsFileSystemHandle() {
       return Promise.resolve(h);
+    }
+  } as any;
+}
+
+// Models a Chromium file item (e.g. dragged out of an archive) that exposes no FileSystemHandle
+// and neuters once the getAsFileSystemHandle() promise resolves on a later task, mirroring the
+// behaviour measured in a real browser: getAsFile() only works synchronously, and
+// getAsFileSystemHandle() resolves to null after a macrotask.
+function dataTransferItemThatNeutersAfterHandleAwait(file: File): DataTransferItem {
+  let neutered = false;
+  return {
+    kind: "file",
+    getAsFile() {
+      return neutered ? null : file;
+    },
+    getAsFileSystemHandle() {
+      return new Promise(resolve =>
+        setTimeout(() => {
+          neutered = true;
+          resolve(null);
+        }, 0)
+      );
     }
   } as any;
 }

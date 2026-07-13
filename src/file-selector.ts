@@ -146,25 +146,30 @@ function flatten<T>(items: any[]): T[] {
 }
 
 async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEntry | null) {
+  // Read the File synchronously, before awaiting anything. A DataTransferItem's accessors are
+  // only valid during the synchronous part of the drop event; awaiting `getAsFileSystemHandle()`
+  // (which resolves on a later task) neuters the item in Chromium, after which `getAsFile()`
+  // returns `null`. Capturing it up front lets us recover the drop when no handle is available.
+  // See https://github.com/react-dropzone/react-dropzone/issues/1435
+  const syncFile = item.getAsFile();
+
   const h = await getFsHandle(item);
-  if (h === null) {
-    throw new UnexpectedObjectError(item);
-  }
-  // It seems that the handle can be `undefined` (see https://github.com/react-dropzone/file-selector/issues/120),
-  // so we check if it isn't; if it is, the code path continues to the next API (`getAsFile`).
-  // The handle is also `undefined` when the File System Access API isn't available or we're not
-  // in a secure context, in which case we likewise fall back to `getAsFile`.
-  if (h !== undefined) {
+  // Prefer the File System Access handle when we got one: it carries a durable handle (and, for
+  // cross-window drops, the freshest File).
+  if (h !== null && h !== undefined) {
     const file = await h.getFile();
     file.handle = h;
     return toFileWithPath(file);
   }
-  const file = item.getAsFile();
-  if (!file) {
+  // No usable handle. `h` is `null` when Chromium has no backing handle for the item (e.g. a file
+  // dragged out of an archive — see the issue above) and `undefined` when the File System Access
+  // API is unavailable or we're not in a secure context (see
+  // https://github.com/react-dropzone/file-selector/issues/120). In both cases fall back to the
+  // File we captured synchronously rather than throwing or re-reading a now-neutered item.
+  if (!syncFile) {
     throw new UnexpectedObjectError(item);
   }
-  const fwp = toFileWithPath(file, entry?.fullPath ?? undefined);
-  return fwp;
+  return toFileWithPath(syncFile, entry?.fullPath ?? undefined);
 }
 
 // Resolve the https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle for a dropped item.
