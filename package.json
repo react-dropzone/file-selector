@@ -46,6 +46,9 @@
     "access": "public"
   },
   "scripts": {
+    "prepare": "prek install || exit 0",
+    "hooks:install": "prek install",
+    "hooks:run": "prek run --all-files",
     "prebuild": "npm run clean",
     "build": "tsdown",
     "dev": "tsdown --watch",
