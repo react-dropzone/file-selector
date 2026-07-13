@@ -1,4 +1,6 @@
-![file-selector logo](https://raw.githubusercontent.com/react-dropzone/.github/main/brand/assets/logo.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/react-dropzone/.github/main/brand/assets/logo.png" alt="file-selector logo" width="120" />
+</p>
 
 # file-selector
 
