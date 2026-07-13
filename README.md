@@ -161,12 +161,20 @@ The project is built with [tsdown](https://tsdown.dev) (Rolldown), type-checked 
 | `npm run docs:dev`        | Run the [Vocs](https://vocs.dev) docs site locally.                              |
 | `npm run docs:build`      | Build the docs site into `site/`.                                                |
 | `npm run docs:preview`    | Preview the built docs site.                                                     |
+| `npm run hooks:install`   | Install the git hooks (`prek install`).                                          |
+| `npm run hooks:run`       | Run every git hook over the whole repo.                                          |
 
 The build emits into `dist/`:
 
 - `dist/index.js` — ES module
 - `dist/index.cjs` — CommonJS module
 - `dist/index.d.ts` — TypeScript declarations
+
+### Git hooks
+
+Git hooks are managed with [prek](https://github.com/j178/prek), a fast Rust drop-in for the [pre-commit](https://pre-commit.com) framework (configured in [`.pre-commit-config.yaml`](.pre-commit-config.yaml)). On commit they format and lint the staged files with oxfmt/oxlint, and check the message against [Conventional Commits](https://www.conventionalcommits.org) — the same convention [semantic-release](https://semantic-release.gitbook.io) uses to cut releases.
+
+prek is a standalone binary, so install it once (e.g. `uv tool install prek`, `brew install prek`, or see the [install docs](https://github.com/j178/prek#installation)). `npm install` then wires up the hooks automatically; run `npm run hooks:install` to (re)install them by hand. The hooks are optional — CI enforces the same lint, format and commit checks — but they catch issues before you push.
 
 ## Credits
 
