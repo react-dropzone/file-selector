@@ -1,5 +1,10 @@
 import {defineConfig} from "vocs/config";
 
+// Project Pages are served from https://react-dropzone.github.io/file-selector/,
+// so every asset/route must carry this prefix. Drop it (here and on the
+// icon/logo URLs below) if a custom domain is used.
+const basePath = "/file-selector";
+
 export default defineConfig({
   // Keep Vite's root at the repo root (default) but move Vocs' sources under
   // `docs/` so they don't collide with the library's own `src/` and `dist/`.
@@ -8,9 +13,11 @@ export default defineConfig({
   outDir: "site",
   // GitHub Pages is static hosting — emit fully pre-rendered HTML for every route.
   renderStrategy: "full-static",
-  // Project Pages are served from https://react-dropzone.github.io/file-selector/,
-  // so every asset/route must be prefixed. Drop this if a custom domain is used.
-  basePath: "/file-selector",
+  basePath,
+  // Favicon + header logo. Vocs uses these URLs verbatim (no basePath prefix),
+  // so include it explicitly. Assets live in /public, synced from react-dropzone/.github.
+  iconUrl: `${basePath}/favicon.svg`,
+  logoUrl: {light: `${basePath}/fileselector-lockup.svg`, dark: `${basePath}/fileselector-lockup-dark.svg`},
   title: "file-selector",
   titleTemplate: "%s · file-selector",
   description: "Convert a DragEvent or file input into a flat list of File objects.",
