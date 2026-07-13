@@ -1,3 +1,5 @@
+![file-selector logo](https://raw.githubusercontent.com/react-dropzone/.github/main/brand/assets/logo.png)
+
 # file-selector
 
 > A small package for converting a [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent) or [file input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file) to a list of File objects.
