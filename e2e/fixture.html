@@ -20,15 +20,20 @@
       async function handle(evt) {
         try {
           const files = await fromEvent(evt);
-          window.__result = files.map(file => ({
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            path: file.path,
-            relativePath: file.relativePath,
-            isFile: file instanceof File,
-            hasHandle: typeof file.handle?.getFile === "function"
-          }));
+          // Read contents *after* fromEvent resolved (i.e. after the drop event and its awaits), to
+          // prove the returned File is still a durable, readable snapshot.
+          window.__result = await Promise.all(
+            files.map(async file => ({
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              path: file.path,
+              relativePath: file.relativePath,
+              isFile: file instanceof File,
+              hasHandle: typeof file.handle?.getFile === "function",
+              content: await file.text()
+            }))
+          );
         } catch (err) {
           window.__error = String((err && err.message) || err);
         }

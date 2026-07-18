@@ -154,10 +154,16 @@ async function fromDataTransferItem(item: DataTransferItem, entry?: FileSystemEn
   const syncFile = item.getAsFile();
 
   const h = await getFsHandle(item);
-  // Prefer the File System Access handle when we got one: it carries a durable handle (and, for
-  // cross-window drops, the freshest File).
   if (h !== null && h !== undefined) {
-    const file = await h.getFile();
+    // Hand back the File we captured synchronously from the DataTransferItem when we have it,
+    // rather than `handle.getFile()`. Both wrap the same dropped file, but only the original
+    // preserves the File object identity that Electron's `webUtils.getPathForFile()` needs to
+    // resolve an on-disk path; a File from `FileSystemFileHandle.getFile()` loses it
+    // (electron/electron#33647), which broke drag-and-drop path access in Electron.
+    // See https://github.com/react-dropzone/react-dropzone/issues/1411
+    // `syncFile` is only null in rare cases (e.g. a cross-window drop where getAsFile() returned
+    // null), so fall back to the handle's File there. Either way, attach the durable handle.
+    const file = syncFile ?? (await h.getFile());
     file.handle = h;
     return toFileWithPath(file);
   }
