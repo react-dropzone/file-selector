@@ -22,6 +22,7 @@ export interface SelectedFile {
   relativePath?: string;
   isFile: boolean;
   hasHandle: boolean;
+  content: string;
 }
 
 const MIME: Record<string, string> = {

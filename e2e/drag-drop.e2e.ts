@@ -26,6 +26,19 @@ test("drops a single file and returns it", async ({page}) => {
   expect(files[0].hasHandle).toBe(true);
 });
 
+test("the returned File stays readable after the drop (issue #1411)", async ({page}) => {
+  // The handle branch now hands back the File captured from getAsFile() rather than
+  // handle.getFile(). Reading its contents *after* the drop event resolved proves that File is a
+  // durable, readable snapshot — the property Electron's webUtils.getPathForFile() relies on, and
+  // what regressed when v1.x started returning the handle's File instead.
+  // https://github.com/react-dropzone/react-dropzone/issues/1411
+  await cdpDrop(page, [fixture("files/hello.json")]);
+
+  const files = await readResult(page);
+  expect(files[0].hasHandle).toBe(true);
+  expect(files[0].content).toBe('{"hello": true}\n');
+});
+
 test("drops a directory and flattens it recursively", async ({page}) => {
   await cdpDrop(page, [fixture("tree")]);
 

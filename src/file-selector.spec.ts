@@ -453,6 +453,53 @@ it("reads getAsFile() synchronously so awaiting getAsFileSystemHandle can't neut
   expect((files[0] as FileWithPath).name).toBe(name);
 });
 
+it("returns the original getAsFile() File (not handle.getFile()) so Electron's webUtils.getPathForFile keeps resolving a path (issue #1411)", async () => {
+  // In Electron, webUtils.getPathForFile() only resolves an on-disk path from the *original* File
+  // the drop produced (what DataTransferItem.getAsFile() returns). A File from
+  // FileSystemFileHandle.getFile() loses that path (electron/electron#33647), so when a handle is
+  // available we must still hand back the original File, with the handle attached.
+  // See https://github.com/react-dropzone/react-dropzone/issues/1411
+  const name = "dropped.json";
+  const originalFile = createFile(name, {ping: true}, {type: "application/json"});
+  const handleFile = createFile(name, {ping: true}, {type: "application/json"});
+  const h = {
+    getFile() {
+      return Promise.resolve(handleFile);
+    }
+  } as any;
+  const evt = dragEvtFromItems([dataTransferItemWithFsHandle(originalFile, h)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+
+  const [file] = files as FileWithPath[];
+  // Object identity is preserved: the returned File is the one from getAsFile(), not the handle's.
+  expect(file).toBe(originalFile);
+  expect(file).not.toBe(handleFile);
+  // The durable handle is still attached.
+  expect((file as any).handle).toBe(h);
+});
+
+it("falls back to handle.getFile() when getAsFile() returns null (e.g. a cross-window drop)", async () => {
+  // No original File to preserve, so the handle's File is the only source. It still carries the
+  // durable handle.
+  const name = "cross-window.json";
+  const handleFile = createFile(name, {ping: true}, {type: "application/json"});
+  const h = {
+    getFile() {
+      return Promise.resolve(handleFile);
+    }
+  } as any;
+  const evt = dragEvtFromItems([dataTransferItemWithFsHandle(null, h)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+
+  const [file] = files as FileWithPath[];
+  expect(file).toBe(handleFile);
+  expect((file as any).handle).toBe(h);
+});
+
 it("guesses the {type} from the extension using the built-in defaults", async () => {
   const mockFile = createFile("test.png", {ping: true}); // typeless File
   const evt = inputEvtFromFiles(mockFile);
