@@ -453,6 +453,25 @@ it("reads getAsFile() synchronously so awaiting getAsFileSystemHandle can't neut
   expect((files[0] as FileWithPath).name).toBe(name);
 });
 
+it("keeps every file when several items neuter after their handle await (issue #1428)", async () => {
+  // Dragging the same N files repeatedly sometimes yielded only 2-3 of 5. That was the neutering
+  // race spread across a multi-file drop: each item neuters once its getAsFileSystemHandle() promise
+  // resolves on a later task, so reading getAsFile() after the await dropped an unpredictable number
+  // of files. Every getAsFile() must be captured synchronously - before any await resolves - so all
+  // N survive on every drop. See https://github.com/react-dropzone/react-dropzone/issues/1428
+  const names = ["a.txt", "b.txt", "c.txt", "d.txt", "e.txt"];
+  const items = names.map(name =>
+    dataTransferItemThatNeutersAfterHandleAwait(createFile(name, {ping: true}, {type: "text/plain"}))
+  );
+  const evt = dragEvtFromItems(items);
+
+  const files = await fromEvent(evt);
+
+  expect(files).toHaveLength(names.length);
+  expect((files as FileWithPath[]).map(file => file.name)).toEqual(names);
+  expect(files.every(file => file instanceof File)).toBe(true);
+});
+
 it("returns the original getAsFile() File (not handle.getFile()) so Electron's webUtils.getPathForFile keeps resolving a path (issue #1411)", async () => {
   // In Electron, webUtils.getPathForFile() only resolves an on-disk path from the *original* File
   // the drop produced (what DataTransferItem.getAsFile() returns). A File from
