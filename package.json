@@ -71,13 +71,13 @@
     "docs:preview": "vocs preview"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "@size-limit/file": "^12.1.0",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
-    "oxfmt": "^0.58.0",
-    "oxlint": "^1.73.0",
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0",
     "oxlint-tsgolint": "^0.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -86,7 +86,7 @@
     "tsdown": "^0.22.9",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10",
-    "vocs": "^2.5.3",
+    "vocs": "^2.6.2",
     "waku": "^1.0.0-beta.7"
   },
   "size-limit": [
