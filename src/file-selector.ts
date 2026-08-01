@@ -32,6 +32,9 @@ export interface FromEventOptions {
  * NOTE: If some of the items are folders,
  * everything will be flattened and placed in the same list but the paths will be kept as a {path} property.
  *
+ * A https://developer.mozilla.org/en-US/docs/Web/API/ClipboardEvent (e.g. a paste of a screenshot)
+ * is also supported: its files are read from {clipboardData}.
+ *
  * EXPERIMENTAL: A list of https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle objects can also be passed as an arg
  * and a list of File objects will be returned.
  *
@@ -51,6 +54,10 @@ export async function fromEvent(
 async function getFilesOrItems(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
   if (isObject<DragEvent>(evt) && isDataTransfer(evt.dataTransfer)) {
     return getDataTransferFiles(evt.dataTransfer, evt.type);
+  } else if (isClipboardEvt(evt)) {
+    // Check before isChangeEvt: a paste event also has a {target}, so it would otherwise be
+    // mistaken for an <input> change event.
+    return getClipboardFiles(evt.clipboardData);
   } else if (isChangeEvt(evt)) {
     return getInputFiles(evt);
   } else if (Array.isArray(evt) && evt.every(item => "getFile" in item && typeof item.getFile === "function")) {
@@ -61,6 +68,10 @@ async function getFilesOrItems(evt: Event | any): Promise<(FileWithPath | DataTr
 
 function isDataTransfer(value: any): value is DataTransfer {
   return isObject(value);
+}
+
+function isClipboardEvt(value: any): value is {clipboardData: DataTransfer} {
+  return isObject<{clipboardData: unknown}>(value) && isDataTransfer(value.clipboardData);
 }
 
 function isChangeEvt(value: any): value is Event {
@@ -90,6 +101,20 @@ async function getDataTransferFiles(dt: DataTransfer, type: string) {
   }
   const files = await Promise.all(items.map(toFilePromises));
   return noIgnoredFiles(flatten<FileWithPath>(files));
+}
+
+// A ClipboardEvent exposes its payload via {clipboardData} (a DataTransfer). Unlike a drop, a paste
+// has no directories to traverse - the files (e.g. a pasted screenshot) are plain File objects read
+// synchronously from the "file" items. Some browsers only populate {items}, others only {files}, so
+// we prefer {items} (it lets us skip non-file entries such as pasted text/html) and fall back to the
+// FileList.
+function getClipboardFiles(dt: DataTransfer): FileWithPath[] {
+  const fromItems = fromList<DataTransferItem>(dt.items)
+    .filter(item => item.kind === "file")
+    .map(item => item.getAsFile())
+    .filter((file): file is File => file !== null);
+  const files = fromItems.length > 0 ? fromItems : fromList<File>(dt.files);
+  return noIgnoredFiles(files.map(file => toFileWithPath(file)));
 }
 
 function noIgnoredFiles(files: FileWithPath[]) {

@@ -129,6 +129,54 @@ it("should use the {fullPath} for {path} if {webkitGetAsEntry} is supported and 
   expect(f.path).toBe(fullPath);
 });
 
+it("should return files from {clipboardData} {items} if the passed event is a paste (ClipboardEvent)", async () => {
+  const name = "image.png";
+  const mockFile = createFile(name, {ping: true}, {type: "image/png"});
+  const evt = pasteEvtFromItems([dataTransferItemFromFile(mockFile)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+  expect(files.every(file => file instanceof File)).toBe(true);
+
+  const [file] = files as FileWithPath[];
+
+  expect(file.name).toBe(mockFile.name);
+  expect(file.type).toBe(mockFile.type);
+  expect(file.size).toBe(mockFile.size);
+  expect(file.lastModified).toBe(mockFile.lastModified);
+  expect(file.path).toBe(`./${name}`);
+});
+
+it('skips clipboard {items} that are of kind "string" (e.g. pasted text alongside an image)', async () => {
+  const mockFile = createFile("image.png", {ping: true}, {type: "image/png"});
+  const evt = pasteEvtFromItems([dataTransferItemFromStr("test"), dataTransferItemFromFile(mockFile)]);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+
+  const [file] = files as FileWithPath[];
+  expect(file.name).toBe(mockFile.name);
+  expect(file.type).toBe(mockFile.type);
+});
+
+it("falls back to clipboard {files} when {items} exposes no file entries", async () => {
+  const mockFile = createFile("image.png", {ping: true}, {type: "image/png"});
+  const evt = pasteEvtFromFilesAndItems([mockFile], []);
+
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(1);
+
+  const [file] = files as FileWithPath[];
+  expect(file.name).toBe(mockFile.name);
+  expect(file.type).toBe(mockFile.type);
+});
+
+it("should return an empty array for a paste with no files (e.g. plain text)", async () => {
+  const evt = pasteEvtFromItems([dataTransferItemFromStr("just some text")]);
+  const files = await fromEvent(evt);
+  expect(files).toHaveLength(0);
+});
+
 it('skips DataTransfer {items} that are of kind "string"', async () => {
   const name = "test.json";
   const mockFile = createFile(
@@ -564,6 +612,17 @@ function dragEvtFromFilesAndItems(files: File[], items: DataTransferItem[], type
   return {
     type,
     dataTransfer: {files, items}
+  } as any;
+}
+
+function pasteEvtFromItems(items: DataTransferItem[]): ClipboardEvent {
+  return pasteEvtFromFilesAndItems([], items);
+}
+
+function pasteEvtFromFilesAndItems(files: File[], items: DataTransferItem[]): ClipboardEvent {
+  return {
+    type: "paste",
+    clipboardData: {files, items}
   } as any;
 }
 
