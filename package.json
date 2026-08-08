@@ -71,8 +71,8 @@
     "docs:preview": "vocs preview"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.0",
-    "@size-limit/file": "^13.0.2",
+    "@playwright/test": "^1.62.1",
+    "@size-limit/file": "^13.0.3",
     "@types/node": "^26.1.2",
     "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^30.0.1",
