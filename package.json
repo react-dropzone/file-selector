@@ -68,7 +68,9 @@
     "size": "size-limit",
     "docs:dev": "vocs dev",
     "docs:build": "vocs build",
-    "docs:preview": "vocs preview"
+    "docs:preview": "vocs preview",
+    "pretest:docs:e2e": "npm run docs:build",
+    "test:docs:e2e": "playwright test -c playwright.docs.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
