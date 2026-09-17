@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@size-limit/file": "^13.0.3",
+    "@size-limit/file": "^13.1.1",
     "@types/node": "^26.5.1",
     "@vitest/coverage-v8": "^5.0.0",
     "jsdom": "^30.0.1",
@@ -84,11 +84,11 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-server-dom-webpack": "^19.3.0",
-    "size-limit": "^13.0.3",
+    "size-limit": "^13.1.1",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0",
-    "vocs": "^2.8.5",
+    "vocs": "^2.9.0",
     "waku": "1.0.0-beta.8"
   },
   "size-limit": [
