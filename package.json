@@ -91,6 +91,9 @@
     "vocs": "^2.10.2",
     "waku": "1.0.0-rc.1"
   },
+  "overrides": {
+    "toml": "^5.0.0"
+  },
   "size-limit": [
     {
       "name": "core, esm (fromEvent + default MIME map)",
