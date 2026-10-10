@@ -80,7 +80,7 @@
     "jsdom": "^30.1.2",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
-    "oxlint-tsgolint": "^7.0.2001",
+    "oxlint-tsgolint": "^7.0.2003",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-server-dom-webpack": "^19.3.0",
