@@ -89,7 +89,7 @@
     "typescript": "^7.0.2",
     "vitest": "^5.0.0",
     "vocs": "^2.10.2",
-    "waku": "1.0.0-beta.8"
+    "waku": "1.0.0-rc.1"
   },
   "size-limit": [
     {
