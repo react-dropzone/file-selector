@@ -48,7 +48,8 @@ export async function fromEvent(
   const items = await getFilesOrItems(evt);
   // Guess a MIME type from the file extension once, over the final flat list, for any file the
   // browser left typeless. DataTransferItems (returned for non-'drop' drag events) pass through as-is.
-  return items.map(item => (item instanceof File ? withMimeType(item, mimeTypes) : item));
+  // Converted files have a path even when their File constructor belongs to another window.
+  return items.map(item => ("path" in item ? withMimeType(item, mimeTypes) : item));
 }
 
 async function getFilesOrItems(evt: Event | any): Promise<(FileWithPath | DataTransferItem)[]> {
