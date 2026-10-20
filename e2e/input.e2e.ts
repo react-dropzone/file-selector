@@ -23,3 +23,34 @@ test("keeps webkitRelativePath from <input webkitdirectory>", async ({page}) => 
   expect(files.map(f => f.name).sort()).toEqual(["ping.json", "pong.json"]);
   expect(files.map(f => f.path).sort()).toEqual(["tree/nested/pong.json", "tree/ping.json"]);
 });
+
+test("infers MIME types for files created in another window", async ({page}) => {
+  const result = await page.evaluate(async () => {
+    const moduleUrl = "/dist/index.js";
+    const {fromEvent} = await import(moduleUrl);
+    const iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+    try {
+      const otherWindow = iframe.contentWindow as Window & typeof globalThis;
+      const file = new otherWindow.File(["{}"], "example.json");
+      const [selected] = await fromEvent({target: {files: [file]}});
+      return {
+        isLocalFile: file instanceof File,
+        isSameFile: selected === file,
+        type: selected.type,
+        path: selected.path,
+        content: await selected.text()
+      };
+    } finally {
+      iframe.remove();
+    }
+  });
+
+  expect(result).toEqual({
+    isLocalFile: false,
+    isSameFile: true,
+    type: "application/json",
+    path: "./example.json",
+    content: "{}"
+  });
+});
