@@ -46,6 +46,24 @@ it("should return an empty array if the evt {target} has no {files} prop", async
   expect(files).toHaveLength(0);
 });
 
+it("infers MIME types for files from another window", async () => {
+  const iframe = document.createElement("iframe");
+  document.body.appendChild(iframe);
+  try {
+    const otherWindow = iframe.contentWindow as Window & typeof globalThis;
+    const file = new otherWindow.File(["{}"], "example.json");
+    expect(file).not.toBeInstanceOf(File);
+
+    const files = await fromEvent(inputEvtFromFiles(file));
+
+    expect(files[0]).toBe(file);
+    expect(files[0].type).toBe("application/json");
+    expect((files[0] as FileWithPath).path).toBe("./example.json");
+  } finally {
+    iframe.remove();
+  }
+});
+
 it("should return files if the arg is a list of FileSystemFileHandle", async () => {
   const name = "test.json";
   const [mockFile, mockHandle] = createFileSystemFileHandle(
