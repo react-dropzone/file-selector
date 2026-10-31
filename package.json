@@ -92,7 +92,7 @@
     "waku": "1.0.0-rc.1"
   },
   "overrides": {
-    "toml": "^5.0.0"
+    "toml": "^5.0.1"
   },
   "size-limit": [
     {
