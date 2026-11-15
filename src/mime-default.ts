@@ -31,7 +31,7 @@ export const DEFAULT_MIME_TYPES: Map<string, string> = new Map([
   ["ogg", "audio/ogg"],
   ["pdf", "application/pdf"],
   ["png", "image/png"],
-  ["ppt", "application/powerpoint"],
+  ["ppt", "application/vnd.ms-powerpoint"],
   ["pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
   ["svg", "image/svg+xml"],
   ["tif", "image/tiff"],

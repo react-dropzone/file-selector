@@ -123,6 +123,20 @@ describe("toFile()", () => {
     }
   });
 
+  it("infers registered IANA MIME types for .ppt, .aac, .docm, .potm, .3gp, and .ai", () => {
+    expect(withMimeType(new File([], "deck.ppt"), DEFAULT_MIME_TYPES).type).toBe("application/vnd.ms-powerpoint");
+    expect(withMimeType(new File([], "deck.ppt"), COMMON_MIME_TYPES).type).toBe("application/vnd.ms-powerpoint");
+    expect(withMimeType(new File([], "song.aac"), COMMON_MIME_TYPES).type).toBe("audio/aac");
+    expect(withMimeType(new File([], "report.docm"), COMMON_MIME_TYPES).type).toBe(
+      "application/vnd.ms-word.document.macroEnabled.12"
+    );
+    expect(withMimeType(new File([], "theme.potm"), COMMON_MIME_TYPES).type).toBe(
+      "application/vnd.ms-powerpoint.template.macroEnabled.12"
+    );
+    expect(withMimeType(new File([], "clip.3gp"), COMMON_MIME_TYPES).type).toBe("video/3gpp");
+    expect(withMimeType(new File([], "logo.ai"), COMMON_MIME_TYPES).type).toBe("application/postscript");
+  });
+
   test("{type} is enumerable", () => {
     const file = new File([], "test.gif");
     const fileWithPath = withMimeType(toFileWithPath(file), DEFAULT_MIME_TYPES);
