@@ -71,8 +71,9 @@ npm run test:docs:e2e   # docs hydration smoke (run when you touch the docs or a
 - Keep the body minimal, or omit it. A good subject plus the diff is usually enough; add a body only
   for what the code cannot show (why, a trade-off, a non-obvious consequence). Never restate the
   change or narrate the diff.
-- Disclose AI with an `Assisted-by: Claude:claude-opus-4-8` trailer. Never `Co-Authored-By`, and
-  never add a human's `Signed-off-by`.
+- Disclose AI with an `Assisted-by: <Provider>:<model>` trailer matching the assisting model
+  (e.g. `Assisted-by: Google:gemini-3.8-flash` or `Assisted-by: Claude:claude-opus-4-8`). Never
+  `Co-Authored-By`, and never add a human's `Signed-off-by`.
 
 ## Tests
 
